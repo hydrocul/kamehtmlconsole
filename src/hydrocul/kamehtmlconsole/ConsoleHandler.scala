@@ -3,11 +3,25 @@ package hydrocul.kamehtmlconsole;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 import hydrocul.util.ObjectPool;
 
-class ConsoleHandler(objectPool: ObjectPool){
+trait ConsoleHandler {
+
+  import ConsoleHandler._;
+
+  /**
+   *
+   *
+   * @param path request path, empty string or string which starts with "/"
+   */
+  def handle(path: String, request: Request, response: Response);
+
+}
+
+object ConsoleHandler {
 
   trait Request {
 
@@ -21,27 +35,35 @@ class ConsoleHandler(objectPool: ObjectPool){
 
     def setStatus(statucCode: Int);
 
-    def getWriter(): PrintWriter;
+    def getWriter(charsetEncoding: String): PrintWriter;
+
+    def getOutputStream(): OutputStream;
 
     def sendError(statucCode: Int, msg: String);
 
   }
 
-  def handle(path: String, request: Request, response: Response){
-    // path: request path, empty string or string which starts with "/"
+}
 
+private[kamehtmlconsole] class ConsoleHandlerImpl(objectPool: ObjectPool) extends ConsoleHandler {
+
+  import ConsoleHandler._;
+
+  def handle(path: String, request: Request, response: Response){
     if(path.startsWith("/etc/")){
       handleEtc(path.substring(4), request, response);
     } else if(path.startsWith("/i/")){
-      handleUserInput(path.substring(2), request. response);
+      handleUserInput(path.substring(2), request, response);
     } else if(path.startsWith("/c/")){
       handleConsole(path.substring(2), request, response);
     } else {
       handleHome(path, request, response);
     }
-
   }
 
+  /**
+   * handle favicon.ico, loading.gif or other images, css,,,.
+   */
   private def handleEtc(path: String, request: Request, response: Response){
     val fname = path.substring(1);
     val resourceIp = getClass.getResourceAsStream(fname);
@@ -66,13 +88,16 @@ class ConsoleHandler(objectPool: ObjectPool){
     val bufferedResourceIp = new BufferedInputStream(resourceIp);
     val responseOp = new BufferedOutputStream(response.getOutputStream);
     try {
-      val buf = new Array[byte](1024);
-      while(true){
+      val buf = new Array[Byte](1024);
+      while({
         val len = bufferedResourceIp.read(buf, 0, buf.length);
-        if(len < 0)
-          break;
-        responseOp.write(buf, 0, len);
-      }
+        if(len < 0){
+          false;
+        } else {
+          responseOp.write(buf, 0, len);
+          true;
+        }
+      }){};
     } finally {
       responseOp.close();
       bufferedResourceIp.close();
@@ -80,12 +105,15 @@ class ConsoleHandler(objectPool: ObjectPool){
   }
 
   private def handleUserInput(path: String, request: Request, response: Response){
+    // TODO
   }
 
   private def handleConsole(path: String, request: Request, response: Response){
+    // TODO
   }
 
   private def handleHome(path: String, request: Request, response: Response){
+    // TODO
   }
 
 }

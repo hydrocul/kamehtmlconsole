@@ -10,6 +10,11 @@ wget --no-check-certificate https://github.com/downloads/hydrocul/kameutil/hydro
 popd >/dev/null
 fi
 
+if [ ! -d ./class ] ; then
+echo mkdir ./class
+fi
+cp -r ./resource/* ./class
+
 mkbuildsub()
 {
 
@@ -38,7 +43,8 @@ S=0
 mkjava()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo javac ./class \$1/\$2    
+    echo javac ./class \$1/src/\$2
+    grep -r TODO \$1/src/\$2
     javac -classpath ./class:./lib/* -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1
@@ -51,7 +57,8 @@ mkjava()
 mkscala()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo scalac \$1/\$2    
+    echo scalac \$1/src/\$2
+    grep -r TODO \$1/src/\$2
     fsc -classpath ./class:./lib/* -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1

@@ -1,0 +1,6 @@
+class/
+touch/
+tmp/
+lib/
+build/
+*.tmp

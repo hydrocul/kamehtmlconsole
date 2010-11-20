@@ -2,7 +2,7 @@ package hydrocul.kamehtmlconsole;
 
 import hydrocul.util.ObjectPool;
 
-class Console(objectPool: ObjectPool, listener: ConsoleListener){
+class ConsoleContainer(objectPool: ObjectPool, listener: ConsoleListener){
 
   private val handler = new ConsoleHandlerImpl(objectPool);
 

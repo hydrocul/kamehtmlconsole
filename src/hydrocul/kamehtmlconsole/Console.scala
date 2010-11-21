@@ -24,7 +24,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
 }
 
-object ConsoleImpl {
+private[kamehtmlconsole] object ConsoleImpl {
 
   private val maxLineCount = 500;
 

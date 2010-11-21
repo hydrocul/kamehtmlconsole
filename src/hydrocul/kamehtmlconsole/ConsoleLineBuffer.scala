@@ -43,7 +43,7 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
 
 }
 
-object ConsoleLineBuffer {
+private[kamehtmlconsole] object ConsoleLineBufferImpl {
 
   private val globalCounter = new AtomicInteger(0);
 

@@ -43,8 +43,8 @@ S=0
 mkjava()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
-    echo javac ./class \$1/src/\$2
-    grep -r TODO \$1/src/\$2
+    echo javac \$1/src/\$2
+    grep TODO \$1/src/\$2
     javac -classpath ./class:./lib/* -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1
@@ -52,19 +52,31 @@ mkjava()
     mkdir -p \`dirname \$1/touch/\$2.touch\`
     touch \$1/touch/\$2.touch
     fi
+  else
+    grep TODO \$1/src/\$2 >/dev/null
+    if [ \$? -eq 0 ] ; then
+      echo TODO \$1/src/\$2
+      grep TODO \$1/src/\$2
+    fi
   fi
 }
 mkscala()
 {
   if [ \$1/src/\$2 -nt \$1/touch/\$2.touch ] ; then
     echo scalac \$1/src/\$2
-    grep -r TODO \$1/src/\$2
+    grep TODO \$1/src/\$2
     fsc -classpath ./class:./lib/* -sourcepath \$1/src -d \$1/class \$1/src/\$2
     if [ \$? -ne 0 ] ; then
     S=1
     else
     mkdir -p \`dirname \$1/touch/\$2.touch\`
     touch \$1/touch/\$2.touch
+    fi
+  else
+    grep TODO \$1/src/\$2 >/dev/null
+    if [ \$? -eq 0 ] ; then
+      echo TODO \$1/src/\$2
+      grep TODO \$1/src/\$2
     fi
   fi
 }

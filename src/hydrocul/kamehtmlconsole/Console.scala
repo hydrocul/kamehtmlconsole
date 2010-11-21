@@ -2,16 +2,30 @@ package hydrocul.kamehtmlconsole;
 
 import hydrocul.util.ObjectPool;
 
-class Console(objectPool: ObjectPool, baseUrl: String){
+trait Console {
 
-  import Console._;
+  def getLoadingHtml: String;
 
-  def getLoadingHtml = "<img src=\"" + baseUrl + "etc/loading.gif\" width=\"16\" height=\"16\" border=\"0\" alt=\"loading\" />";
+  def newLineGroup(): ConsoleLineGroup;
 
 }
 
-object Console {
+private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: String) extends Console {
 
-  val maxLineCount = 500;
+  import ConsoleImpl._;
+
+  def getLoadingHtml = "<img src=\"" + baseUrl + "etc/loading.gif\" width=\"16\" height=\"16\" border=\"0\" alt=\"loading\" />";
+
+  def newLineGroup(): ConsoleLineGroup = {
+    val ret = new ConsoleLineGroupImpl(objectPool);
+    // TODO newLineGroup
+    return ret;
+  }
+
+}
+
+object ConsoleImpl {
+
+  private val maxLineCount = 500;
 
 }

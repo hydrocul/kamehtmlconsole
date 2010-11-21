@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import hydrocul.util.StringLib;
 
 private[kamehtmlconsole] case class ConsoleLine(lineId: String, counter: Int, html: String,
-  javascript: List[String]){
+  javascript: IndexedSeq[String]){
 
 }
 

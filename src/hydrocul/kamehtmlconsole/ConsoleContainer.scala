@@ -23,7 +23,7 @@ class ConsoleContainer(objectPool: ObjectPool, baseUrl: String){
 
   });
 
-  private val console = new Console(objectPool, baseUrl);
+  private val console = new ConsoleImpl(objectPool, baseUrl);
 
   def addListener(listener: ConsoleListener){
     listeners = listeners :+ listener;

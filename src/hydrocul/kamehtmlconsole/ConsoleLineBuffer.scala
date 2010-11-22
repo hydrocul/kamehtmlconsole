@@ -47,4 +47,19 @@ private[kamehtmlconsole] object ConsoleLineBufferImpl {
 
   private val globalCounter = new AtomicInteger(0);
 
+  private def getTextFromHtml(html: String): String = {
+    var text = html;
+    val r = "<[^>]+>".r;
+    while({
+      r.findFirstMatchIn(text) match {
+        case Some(m) =>
+          text = text.substring(0, m.start) + text.substring(m.end);
+          true;
+        case None =>
+          false;
+      }
+    }){}
+    text;
+  }
+
 }

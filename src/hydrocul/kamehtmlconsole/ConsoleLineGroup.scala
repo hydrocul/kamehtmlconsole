@@ -18,38 +18,32 @@ private[kamehtmlconsole] class ConsoleLineGroupImpl(objectPool: ObjectPool,
   @volatile private var lines: IndexedSeq[ConsoleLineBuffer] = Vector();
 
   def newLine(): ConsoleLineBuffer = {
-    synchronized {
-      val ret = new ConsoleLineBufferImpl(objectPool);
-      lines = lines :+ ret;
-      limitLineCount();
-      ret;
-    }
+    val ret = new ConsoleLineBufferImpl(objectPool);
+    lines = lines :+ ret;
+    limitLineCount();
+    ret;
   }
 
   def newLineBefore(after: ConsoleLineBuffer): ConsoleLineBuffer = {
-    synchronized {
-      val i = lines.indexOf(after);
-      if(i < 0){
-        return new ConsoleLineBufferImpl(objectPool);
-      }
-      val ret = new ConsoleLineBufferImpl(objectPool);
-      lines = (lines.take(i) :+ ret) ++ lines.drop(i);
-      limitLineCount();
-      ret;
+    val i = lines.indexOf(after);
+    if(i < 0){
+      return new ConsoleLineBufferImpl(objectPool);
     }
+    val ret = new ConsoleLineBufferImpl(objectPool);
+    lines = (lines.take(i) :+ ret) ++ lines.drop(i);
+    limitLineCount();
+    ret;
   }
 
   def newLineAfter(before: ConsoleLineBuffer): ConsoleLineBuffer = {
-    synchronized {
-      val i = lines.indexOf(before) + 1;
-      if(i <= 0){
-        return new ConsoleLineBufferImpl(objectPool);
-      }
-      val ret = new ConsoleLineBufferImpl(objectPool);
-      lines = (lines.take(i) :+ ret) ++ lines.drop(i);
-      limitLineCount();
-      ret;
+    val i = lines.indexOf(before) + 1;
+    if(i <= 0){
+      return new ConsoleLineBufferImpl(objectPool);
     }
+    val ret = new ConsoleLineBufferImpl(objectPool);
+    lines = (lines.take(i) :+ ret) ++ lines.drop(i);
+    limitLineCount();
+    ret;
   }
 
   private def limitLineCount(){

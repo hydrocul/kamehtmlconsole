@@ -18,8 +18,10 @@ trait ConsoleLineBuffer {
 
 private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) extends ConsoleLineBuffer {
 
+  import ConsoleLineBufferImpl._;
+
   private val lineId: String = objectPool.getKey(this);
-  @volatile private var counter: Int = 0;
+  @volatile private var counter: Int = globalCounter.incrementAndGet();
   @volatile private var html: String = "";
   @volatile private var text: String = "";
   @volatile private var javascript: IndexedSeq[String] = Vector();
@@ -33,15 +35,19 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
   def updateHtml(html: String){
     this.html = html;
     val text = getTextFromHtml(html);
+    // TODO #updateHtml ここで本当は差分文字を取得して、文字入力システムをアシストしたい
     this.text = text;
+    counter = globalCounter.incrementAndGet();
   }
 
   def appendJavascript(javascript: String){
     this.javascript = this.javascript :+ javascript;
+    counter = globalCounter.incrementAndGet();
   }
 
   def addLinkedObject(obj: AnyRef){
     linkedObjects = linkedObjects :+ obj;
+    counter = globalCounter.incrementAndGet();
   }
 
 }

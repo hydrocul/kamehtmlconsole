@@ -91,7 +91,7 @@ exit 1
 fi
 
 # execute test
-bash ./run.sh
+bash ./test.sh
 
 EOS
 

@@ -1,24 +1,19 @@
 package hydrocul.kamehtmlconsole;
 
-import scala.testing.SUnit;
+import hydrocul.kametest.Test;
 
 object ConsoleLineBufferTest {
 
-  def testCases: IndexedSeq[SUnit.Test] = {
-    Vector(
-      testGetTextFromHtml("abc", "abc"),
-      testGetTextFromHtml("abc<a>def</a>", "abcdef"),
-      testGetTextFromHtml("abc<a>de<span class=\"aaa\">f</span></a>", "abcdef"),
-      testGetTextFromHtml("", "")
-    );
+  def test(){
+    testGetTextFromHtml("abc", "abc");
+    testGetTextFromHtml("abc<a>def</a>", "abcdef");
+    testGetTextFromHtml("abc<a>de<span class=\"aaa\">f</span></a>", "abcdef");
+    testGetTextFromHtml("", "");
   }
 
-  private def testGetTextFromHtml(html: String, expected: String): SUnit.Test = new SUnit.TestCase(html){
-    override def enableStackTrace = false;
-    def runTest(){
-      val actual = ConsoleLineBufferImpl.getTextFromHtml(html);
-      assertEquals(expected, actual);
-    }
+  private def testGetTextFromHtml(html: String, expected: String){
+    val actual = ConsoleLineBufferImpl.getTextFromHtml(html);
+    Test.assertEquals(html, expected, actual);
   }
 
 }

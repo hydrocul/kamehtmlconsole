@@ -45,7 +45,7 @@ object ConsoleHandler {
 
 }
 
-private[kamehtmlconsole] class ConsoleHandlerImpl(objectPool: ObjectPool,
+private[kamehtmlconsole] class ConsoleHandlerImpl(objectPool: ObjectPool, baseUrl: String,
     listener: ConsoleListener) extends ConsoleHandler {
 
   import ConsoleHandler._;

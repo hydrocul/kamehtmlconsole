@@ -21,6 +21,7 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
   private val lineId: String = objectPool.getKey(this);
   @volatile private var counter: Int = 0;
   @volatile private var html: String = "";
+  @volatile private var text: String = "";
   @volatile private var javascript: IndexedSeq[String] = Vector();
   @volatile private var linkedObjects: List[AnyRef] = Nil;
 
@@ -31,6 +32,8 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
 
   def updateHtml(html: String){
     this.html = html;
+    val text = getTextFromHtml(html);
+    this.text = text;
   }
 
   def appendJavascript(javascript: String){

@@ -2,12 +2,14 @@ package hydrocul.kamehtmlconsole;
 
 import hydrocul.util.ObjectPool;
 
-// baseUrl: ends with "/"
+/**
+ * @param baseUrl ends with "/"
+ */
 class ConsoleContainer(objectPool: ObjectPool, baseUrl: String){
 
   private var listeners: IndexedSeq[ConsoleListener] = Vector();
 
-  private val handler = new ConsoleHandlerImpl(objectPool, new ConsoleListener(){
+  private val handler = new ConsoleHandlerImpl(objectPool, baseUrl, new ConsoleListener(){
 
     def userText(count: Int, text: String){
       listeners.foreach(_.userText(count, text));

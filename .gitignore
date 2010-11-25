@@ -3,4 +3,5 @@ touch/
 tmp/
 lib/
 build/
+scaladoc/
 *.tmp

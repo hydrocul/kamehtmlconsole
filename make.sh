@@ -40,9 +40,18 @@ buildlib_build_jar hydrocul-kamehtmlconsole.jar
 
 ;;
 ################################
+scaladoc)
+################################
+if [ ! -d ./scaladoc ] ; then
+mkdir ./scaladoc
+fi
+scaladoc -d scaladoc -classpath "lib/*" -encoding UTF-8 src/hydrocul/kamehtmlconsole/*.scala
+
+;;
+################################
 *)
 ################################
-echo "Usage: ./make.sh {compile|test|build}"
+echo "Usage: ./make.sh {compile|test|build|scaladoc}"
 
 ;;
 ################################

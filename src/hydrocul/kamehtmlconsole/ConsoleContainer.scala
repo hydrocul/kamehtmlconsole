@@ -25,13 +25,19 @@ class ConsoleContainer(objectPool: ObjectPool, baseUrl: String){
 
   });
 
-  private val console = new ConsoleImpl(objectPool, baseUrl);
-
   def addListener(listener: ConsoleListener){
     listeners = listeners :+ listener;
   }
 
   def getHandler: ConsoleHandler = handler;
+
+  /**
+   * `Console` のインスタンスを生成する。
+   * 
+   * ここで返す `Console` はマルチスレッド非対応。`Console` とそれに含まれる
+   * `ConsoleLineGroup`, `ConsoleLine` はすべて1つのスレッドからのアクセスが必要。
+   */
+  def createConsole(): Console = new ConsoleImpl(objectPool, baseUrl);
 
 }
 

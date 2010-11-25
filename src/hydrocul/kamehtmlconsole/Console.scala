@@ -50,7 +50,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
   }
 
   private def limitLineCount(){
-    // TODO
+    // TODO #limitLineCount
   }
 
   private val groupListener = new ConsoleLineGroupImpl.Listener {

@@ -4,6 +4,8 @@ import hydrocul.util.ObjectPool;
 
 trait ConsoleLineGroup {
 
+  def getLines: IndexedSeq[ConsoleLineBuffer];
+
   def newLine(): ConsoleLineBuffer;
 
   def newLineBefore(after: ConsoleLineBuffer): ConsoleLineBuffer;
@@ -16,6 +18,8 @@ private[kamehtmlconsole] class ConsoleLineGroupImpl(objectPool: ObjectPool,
   listener: ConsoleLineGroupImpl.Listener) extends ConsoleLineGroup {
 
   @volatile private var lines: IndexedSeq[ConsoleLineBuffer] = Vector();
+
+  def getLines: IndexedSeq[ConsoleLineBuffer] = lines;
 
   def newLine(): ConsoleLineBuffer = {
     val ret = new ConsoleLineBufferImpl(objectPool);

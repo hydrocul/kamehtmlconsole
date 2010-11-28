@@ -65,7 +65,7 @@ private[kamehtmlconsole] class ConsoleLineGroupImpl(objectPool: ObjectPool,
 
   def getLinesInfo: ConsoleLinesInfo = {
     val infos = lines.map(_.getLineInfo).toIndexedSeq;
-    val counter = infos.map(_.counter).max;
+    val counter = if(lines.isEmpty) 0 else infos.map(_.counter).max;
     ConsoleLinesInfo(infos, counter);
   }
 

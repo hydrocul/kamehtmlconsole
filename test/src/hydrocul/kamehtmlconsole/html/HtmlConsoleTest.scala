@@ -14,13 +14,19 @@ object HtmlConsoleTest {
     val objectPool = new ObjectPool(executor);
     val consoleContainer = new ConsoleContainer(objectPool, "/");
     val console = consoleContainer.createConsole();
+    val screen = console.createScreen();
     val htmlConsole = new HtmlConsole(console, console.newLineGroup());
-    
+    val writer = htmlConsole.getPrintWriter;
+    testRefreshJavaScriptCode(screen, 1, "");
+    writer.print("abc");
+    testRefreshJavaScriptCode(screen, 2, "");
+    writer.flush();
+    testRefreshJavaScriptCode(screen, 3, "abc");
   }
 
-  private def testGetTextFromHtml(html: String, expected: String){
-//    val actual = ConsoleLineBufferImpl.getTextFromHtml(html);
-//    Test.assertEquals(html, expected, actual);
+  private def testRefreshJavaScriptCode(screen: ConsoleScreen, num: Int, expected: String){
+    val actual = screen.getRefreshJavaScriptCode();
+    Test.assertEquals(num.toString, expected, actual);
   }
 
 }

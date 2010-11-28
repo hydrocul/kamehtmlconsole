@@ -6,7 +6,7 @@ import hydrocul.util.ObjectPool;
 
 trait ConsoleLineBuffer {
 
-  private[kamehtmlconsole] def getConsoleLine: ConsoleLine;
+  private[kamehtmlconsole] def getLineInfo: ConsoleLineInfo;
 
   def updateHtml(html: String);
 
@@ -27,8 +27,8 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
   @volatile private var javascript: IndexedSeq[String] = Vector();
   @volatile private var linkedObjects: List[AnyRef] = Nil;
 
-  private[kamehtmlconsole] def getConsoleLine: ConsoleLine =
-    new ConsoleLine(lineId, counter, getHtml, javascript);
+  private[kamehtmlconsole] def getLineInfo: ConsoleLineInfo =
+    new ConsoleLineInfo(lineId, counter, getHtml, javascript);
 
   private def getHtml: String = if(html.isEmpty) "&nbsp;" else html;
 

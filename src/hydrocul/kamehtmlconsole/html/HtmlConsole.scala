@@ -3,11 +3,14 @@ package hydrocul.kamehtmlconsole.html;
 import java.io.PrintWriter;
 import java.io.Writer;
 
+import hydrocul.kameq.scala.Pipe._;
 import hydrocul.util.StringLib;
+
+import hydrocul.kamehtmlconsole._;
 
 class HtmlConsole(console: Console, group: ConsoleLineGroup){
 
-  private var line = null;
+  private var line: ConsoleLineBuffer = null;
   private var buf1 = new StringBuilder; // HTML
   private var buf2 = new StringBuilder; // temporary text
   private var isLastCr = false;
@@ -20,13 +23,35 @@ class HtmlConsole(console: Console, group: ConsoleLineGroup){
   }
 
   private def println(){
-    // TODO
+    update();
+    line = null;
+    buf1 = new StringBuilder;
+    buf2 = new StringBuilder;
+    isLastCr = false;
   }
 
   private def write(ch: Int){
-    stask(console){
-      // TODO
-    } submit;
+    if(ch=='\n'){
+      if(!isLastCr){
+        println();
+      } else {
+        isLastCr = false;
+      }
+    } else if(ch=='\r'){
+      isLastCr = true;
+      println();
+    } else {
+      isLastCr = false;
+      buf2.append(ch.asInstanceOf[Char]);
+    }
+  }
+
+  private def writeHtml(ch: Int){
+    if(buf2.length > 0){
+      buf1.append(StringLib.encodeHtmlLong(buf2.toString));
+      buf2 = new StringBuilder;
+    }
+    buf1.append(ch.asInstanceOf[Char]);
   }
 
   // for initializing writer and htmlWriter
@@ -35,17 +60,20 @@ class HtmlConsole(console: Console, group: ConsoleLineGroup){
 
   private val writer: PrintWriter = new Writer(){
 
-    override def write(ch: Int): Unit = stask(console){ HtmlConsole.this.writer(ch); } submit;
+    override def write(ch: Int): Unit =
+      synexec(console){ HtmlConsole.this.write(ch); }
 
     override def write(cbuf: Array[Char], off: Int, len: Int): Unit =
-      stask(console){ (off until off + len).foreach(index => HtmlConsole.this.write(cbuf(index))); } submit;
+      synexec(console){ (off until off + len).foreach(index => HtmlConsole.this.write(cbuf(index))); }
 
-    override def flush(): Unit = stask(console){ HtmlConsole.this.update(); } submit;
+    override def flush(): Unit = synexec(console){ HtmlConsole.this.update(); }
 
-    override def close(): Unit = stask(console){ HtmlConsole.this.update(); } submit;
+    override def close(): Unit = synexec(console){ HtmlConsole.this.update(); }
 
   }
 
   def getPrintWriter: PrintWriter = writer;
+
+  // TODO def getHtmlPrintWriter: PrintWriter;
 
 }

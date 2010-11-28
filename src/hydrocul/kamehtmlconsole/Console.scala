@@ -13,6 +13,12 @@ trait Console {
 
   def newLineGroupAfter(before: ConsoleLineGroup): ConsoleLineGroup;
 
+  def size: Int;
+
+  def getLinesInfo: ConsoleLinesInfo;
+
+  def createScreen(): ConsoleScreen;
+
 }
 
 private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: String) extends Console {
@@ -59,9 +65,16 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
     }
   }
 
-  private[kamehtmlconsole] def size: Int = groups.map(_.size).sum;
+  def size: Int = groups.map(_.size).sum;
 
-  private[kamehtmlconsole] def getLines: IndexedSeq[ConsoleLine] = groups.flatMap(_.getLines);
+  def getLinesInfo: ConsoleLinesInfo = {
+    val g = groups.map(_.getLinesInfo);
+    val infos = g.flatMap(_.lines).toIndexedSeq;
+    val counter = g.map(_.counter).max;
+    ConsoleLinesInfo(infos, counter);
+  }
+
+  def createScreen(): ConsoleScreen = new ConsoleScreenImpl(this);
 
 }
 

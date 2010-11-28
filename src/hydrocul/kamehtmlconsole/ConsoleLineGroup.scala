@@ -4,13 +4,17 @@ import hydrocul.util.ObjectPool;
 
 trait ConsoleLineGroup {
 
-  def getLines: IndexedSeq[ConsoleLineBuffer];
+  def getLine: IndexedSeq[ConsoleLineBuffer];
 
   def newLine(): ConsoleLineBuffer;
 
   def newLineBefore(after: ConsoleLineBuffer): ConsoleLineBuffer;
 
   def newLineAfter(before: ConsoleLineBuffer): ConsoleLineBuffer;
+
+  def size: Int;
+
+  def getLinesInfo: ConsoleLinesInfo;
 
 }
 
@@ -19,7 +23,7 @@ private[kamehtmlconsole] class ConsoleLineGroupImpl(objectPool: ObjectPool,
 
   @volatile private var lines: IndexedSeq[ConsoleLineBuffer] = Vector();
 
-  def getLines: IndexedSeq[ConsoleLineBuffer] = lines;
+  def getLine: IndexedSeq[ConsoleLineBuffer] = lines;
 
   def newLine(): ConsoleLineBuffer = {
     val ret = new ConsoleLineBufferImpl(objectPool);
@@ -57,9 +61,13 @@ private[kamehtmlconsole] class ConsoleLineGroupImpl(objectPool: ObjectPool,
     }
   }
 
-  private[kamehtmlconsole] def size = lines.size;
+  def size = lines.size;
 
-  private[kamehtmlconsole] def getLines: IndexedSeq[ConsoleLine] = lines.map(_.getConsoleLine);
+  def getLinesInfo: ConsoleLinesInfo = {
+    val infos = lines.map(_.getLineInfo).toIndexedSeq;
+    val counter = infos.map(_.counter).max;
+    ConsoleLinesInfo(infos, counter);
+  }
 
 }
 

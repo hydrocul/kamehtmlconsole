@@ -11,7 +11,8 @@ case class ConsoleLineInfo(lineId: String, counter: Int, html: String,
 
 case class ConsoleLinesInfo(lines: IndexedSeq[ConsoleLineInfo], counter: Int);
 
-private[kamehtmlconsole] object ConsoleLineInfo {
+private[kamehtmlconsole]
+object ConsoleLineInfo {
 
   def printInsertFirst(writer: PrintWriter, newLine: ConsoleLineInfo){
     writer.print("$(\"#console\").prepend(\"<div id=\\\"");
@@ -41,7 +42,7 @@ private[kamehtmlconsole] object ConsoleLineInfo {
       writer, newLine.lineId, _));
   }
 
-  def printUpdateJavaScriptCode(writer: PrintWriter,
+  def printUpdate(writer: PrintWriter,
     oldLine: ConsoleLineInfo, newLine: ConsoleLineInfo){
 
     assert(oldLine.lineId==newLine.lineId);
@@ -55,6 +56,14 @@ private[kamehtmlconsole] object ConsoleLineInfo {
     writer.print("\");\n");
     newLine.javascript.drop(oldLine.javascript.size).foreach(printJavaScript(
       writer, newLine.lineId, _));
+  }
+
+  def printDelete(writer: PrintWriter,
+    oldLine: ConsoleLineInfo){
+
+    writer.print("$(\"#");
+    writer.print(oldLine.lineId);
+    writer.print("\").remove();\n");
   }
 
   private def printJavaScript(writer: PrintWriter, lineId: String, javascript: String){

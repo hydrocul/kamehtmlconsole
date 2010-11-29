@@ -19,8 +19,10 @@ object HtmlConsoleTest {
     val writer = htmlConsole.getPrintWriter;
     testRefreshJavaScriptCode(screen, 1, "");
     writer.print("abc");
+    Thread.sleep(100);
     testRefreshJavaScriptCode(screen, 2, "");
     writer.flush();
+    Thread.sleep(100);
     testRefreshJavaScriptCode(screen, 3, "abc");
   }
 

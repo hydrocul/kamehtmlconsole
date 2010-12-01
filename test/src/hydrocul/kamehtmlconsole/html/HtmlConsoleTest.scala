@@ -3,7 +3,7 @@ package hydrocul.kamehtmlconsole.html;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import hydrocul.kametest.Test;
-import hydrocul.util.ObjectPool;
+import hydrocul.util.NumberObjectPool;
 
 import hydrocul.kamehtmlconsole._;
 
@@ -11,7 +11,7 @@ object HtmlConsoleTest {
 
   def test(){
     val executor = new ScheduledThreadPoolExecutor(4);
-    val objectPool = new ObjectPool(executor);
+    val objectPool = new NumberObjectPool(executor);
     val consoleContainer = new ConsoleContainer(objectPool, "/");
     val console = consoleContainer.createConsole();
     val screen = console.createScreen();
@@ -23,7 +23,7 @@ object HtmlConsoleTest {
     testRefreshJavaScriptCode(screen, 2, "");
     writer.flush();
     Thread.sleep(100);
-    testRefreshJavaScriptCode(screen, 3, "abc");
+    testRefreshJavaScriptCode(screen, 3, """$("#console").prepend("<div id=\"1\" class=\"line\">abc</div>");initLine("1");""" + "\n");
   }
 
   private def testRefreshJavaScriptCode(screen: ConsoleScreen, num: Int, expected: String){

@@ -45,17 +45,21 @@ object ConsoleLineInfo {
   def printUpdate(writer: PrintWriter,
     oldLine: ConsoleLineInfo, newLine: ConsoleLineInfo){
 
-    assert(oldLine.lineId==newLine.lineId);
-    writer.print("$(\"#");
-    writer.print(newLine.lineId);
-    writer.print("\").html(\"");
-    writer.print(StringLib.encodeJavaLiteral(newLine.html));
-    writer.print("\");\n");
-    writer.print("initLine(\"");
-    writer.print(newLine.lineId);
-    writer.print("\");\n");
-    newLine.javascript.drop(oldLine.javascript.size).foreach(printJavaScript(
-      writer, newLine.lineId, _));
+    assert(oldLine.lineId == newLine.lineId);
+    if(oldLine.counter != newLine.counter){
+      if(oldLine.html != newLine.html){
+        writer.print("$(\"#");
+        writer.print(newLine.lineId);
+        writer.print("\").html(\"");
+        writer.print(StringLib.encodeJavaLiteral(newLine.html));
+        writer.print("\");");
+        writer.print("initLine(\"");
+        writer.print(newLine.lineId);
+        writer.print("\");\n");
+      }
+      newLine.javascript.drop(oldLine.javascript.size).foreach(printJavaScript(
+        writer, newLine.lineId, _));
+    }
   }
 
   def printDelete(writer: PrintWriter,

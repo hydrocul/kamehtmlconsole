@@ -22,15 +22,15 @@ object HtmlConsoleTest {
     testRefreshJavaScriptCode(screen, 1, "");
 
     writer.print("abc");
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 2, "");
 
     writer.flush();
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 3, """$("#console").prepend("<div id=\"1\" class=\"line\">abc</div>");initLine("1");""" + "\n");
 
     writer.print("def");
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 4, "");
 
     writer.flush();

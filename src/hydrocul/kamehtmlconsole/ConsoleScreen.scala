@@ -34,36 +34,46 @@ private[kamehtmlconsole] class ConsoleScreenImpl(console: Console) extends Conso
      * JavaScript code を生成できる。
      */
     @tailrec
-    def sub(oldLines: IndexedSeq[ConsoleLineInfo], newLines: IndexedSeq[ConsoleLineInfo], deleteIndex: Int, prevLine: ConsoleLineInfo, cont: IndexedSeq[PrintWriter=>Unit]): IndexedSeq[PrintWriter=>Unit] = {
+    def sub(oldLines: IndexedSeq[ConsoleLineInfo], newLines: IndexedSeq[ConsoleLineInfo],
+      deleteIndex: Int, prevLine: ConsoleLineInfo, cont: IndexedSeq[PrintWriter=>Unit]):
+      IndexedSeq[PrintWriter=>Unit] = {
       val (writer, oldLinesNext, newLinesNext, deleteIndexNext, prevLineNext) = if(oldLines.isEmpty){
         if(newLines.isEmpty){
           return cont;
         } else {
           val newFirst = newLines(0);
           if(prevLine==null){
-            (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)) , oldLines, newLines.drop(1), 0, newFirst);
+            (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)),
+              oldLines, newLines.drop(1), 0, newFirst);
           } else {
-            (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)), oldLines, newLines.drop(1), 0, newFirst);
+            (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)),
+              oldLines, newLines.drop(1), 0, newFirst);
           }
         }
       } else {
         val oldFirst = oldLines(0);
         if(deleteIndex > 0){
-          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)), oldLines.drop(1), newLines, deleteIndex - 1, prevLine);
+          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+            oldLines.drop(1), newLines, deleteIndex - 1, prevLine);
         } else if(newLines.isEmpty){
-          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)), oldLines.drop(1), newLines, 0, prevLine);
+          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+            oldLines.drop(1), newLines, 0, prevLine);
         } else {
           val newFirst = newLines(0);
           if(oldFirst.lineId==newFirst.lineId){
-            (((writer: PrintWriter) => ConsoleLineInfo.printUpdate(writer, oldFirst, newFirst)), oldLines.drop(1), newLines.drop(1), 0, newFirst);
+            (((writer: PrintWriter) => ConsoleLineInfo.printUpdate(writer, oldFirst, newFirst)),
+              oldLines.drop(1), newLines.drop(1), 0, newFirst);
           } else {
             val i = oldLines.findIndexOf(_.lineId==newFirst.lineId);
             if(i >= 0){
-              (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)), oldLines.drop(1), newLines, i - 1, prevLine);
+              (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+                oldLines.drop(1), newLines, i - 1, prevLine);
             } else if(prevLine==null){
-              (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)), oldLines, newLines.drop(1), 0, newFirst);
+              (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)),
+                oldLines, newLines.drop(1), 0, newFirst);
             } else {
-              (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)), oldLines, newLines.drop(1), 0, newFirst);
+              (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)),
+                oldLines, newLines.drop(1), 0, newFirst);
             }
           }
         }

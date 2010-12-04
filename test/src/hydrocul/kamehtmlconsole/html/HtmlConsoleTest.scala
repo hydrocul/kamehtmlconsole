@@ -18,6 +18,7 @@ object HtmlConsoleTest {
     val screen = console.createScreen();
     val htmlConsole = new HtmlConsole(console, console.newLineGroup());
     val writer = htmlConsole.getPrintWriter;
+    val htmlWriter = htmlConsole.getHtmlPrintWriter;
 
     testRefreshJavaScriptCode(screen, 1, "");
 
@@ -52,6 +53,26 @@ object HtmlConsoleTest {
     writer.flush();
     Thread.sleep(100);
     testRefreshJavaScriptCode(screen, 9, """$("#2").html("&amp;");initLine("2");""" + "\n");
+
+    writer.print("<");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 10, "");
+
+    writer.flush();
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 11, """$("#2").html("&amp;&lt;");initLine("2");""" + "\n");
+
+    writer.print(">\n");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 12, """$("#2").html("&amp;&lt;&gt;");initLine("2");""" + "\n");
+
+    htmlWriter.print("&lt;&amp;&gt;");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 13, "");
+
+    htmlWriter.flush();
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 14, """$("#2").after("<div id=\"3\" class=\"line\">&lt;&amp;&gt;</div>");initLine("3");""" + "\n");
 
   }
 

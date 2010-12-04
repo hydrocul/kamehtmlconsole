@@ -34,9 +34,7 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
 
   def updateHtml(html: String){
     this.html = html;
-    val text = getTextFromHtml(html);
-    // TODO #updateHtml ここで本当は差分文字を取得して、文字入力システムをアシストしたい
-    this.text = text;
+    this.text = getTextFromHtml(html);
     counter = globalCounter.incrementAndGet();
   }
 

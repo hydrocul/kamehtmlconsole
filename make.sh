@@ -46,7 +46,7 @@ scaladoc)
 if [ ! -d ./scaladoc ] ; then
 mkdir ./scaladoc
 fi
-scaladoc -d scaladoc -classpath "lib/*" -encoding UTF-8 src/hydrocul/kamehtmlconsole/*.scala
+scaladoc -d scaladoc -classpath "lib/*:class/" -encoding UTF-8 src/hydrocul/kamehtmlconsole/*.scala src/hydrocul/kamehtmlconsole/html/*.scala
 
 ;;
 ################################

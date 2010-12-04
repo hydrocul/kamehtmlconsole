@@ -72,8 +72,22 @@ class HtmlConsole(console: Console, group: ConsoleLineGroup){
 
   }
 
+  private val htmlWriter: PrintWriter = new Writer(){
+
+    override def write(ch: Int): Unit =
+      synexec(console){ HtmlConsole.this.writeHtml(ch); }
+
+    override def write(cbuf: Array[Char], off: Int, len: Int): Unit =
+      synexec(console){ (off until off + len).foreach(index => HtmlConsole.this.writeHtml(cbuf(index))); }
+
+    override def flush(): Unit = synexec(console){ HtmlConsole.this.update(); }
+
+    override def close(): Unit = synexec(console){ HtmlConsole.this.update(); }
+
+  }
+
   def getPrintWriter: PrintWriter = writer;
 
-  // TODO def getHtmlPrintWriter: PrintWriter;
+  def getHtmlPrintWriter: PrintWriter = htmlWriter;
 
 }

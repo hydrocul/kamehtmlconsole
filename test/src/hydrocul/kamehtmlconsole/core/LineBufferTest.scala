@@ -1,8 +1,8 @@
-package hydrocul.kamehtmlconsole;
+package hydrocul.kamehtmlconsole.core;
 
 import hydrocul.kametest.Test;
 
-object ConsoleLineBufferTest {
+object LineBufferTest {
 
   def test(){
     testGetTextFromHtml("abc", "abc");
@@ -12,7 +12,7 @@ object ConsoleLineBufferTest {
   }
 
   private def testGetTextFromHtml(html: String, expected: String){
-    val actual = ConsoleLineBufferImpl.getTextFromHtml(html);
+    val actual = LineBufferImpl.getTextFromHtml(html);
     Test.assertEquals(html, expected, actual);
   }
 

@@ -5,6 +5,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import hydrocul.kametest.Test;
 import hydrocul.util.NumberObjectPool;
 
+import hydrocul.kamehtmlconsole._;
 import hydrocul.kamehtmlconsole.core._;
 
 object HtmlConsoleTest {

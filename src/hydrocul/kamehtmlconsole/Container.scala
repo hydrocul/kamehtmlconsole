@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole.core;
+package hydrocul.kamehtmlconsole;
 
 import hydrocul.util.ObjectPool;
 
@@ -37,7 +37,7 @@ class Container(objectPool: ObjectPool, baseUrl: String){
    * ここで返す `Console` はマルチスレッド非対応。`Console` とそれに含まれる
    * `ConsoleLineGroup`, `ConsoleLine` はすべて1つのスレッドからのアクセスが必要。
    */
-  def createConsole(): Console = new ConsoleImpl(objectPool, baseUrl);
+  def createConsole(): core.Console = new core.ConsoleImpl(objectPool, baseUrl);
 
 }
 

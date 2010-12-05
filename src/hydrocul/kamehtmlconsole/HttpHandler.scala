@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole.core;
+package hydrocul.kamehtmlconsole;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

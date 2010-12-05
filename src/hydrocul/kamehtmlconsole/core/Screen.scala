@@ -25,7 +25,7 @@ private[kamehtmlconsole] class ScreenImpl(console: Console) extends Screen {
   }
 
   private def getRefreshJavaScriptCodeSub(oldLines: Vector[LineInfo],
-    newLines: VectorSeq[LineInfo]): String = {
+    newLines: Vector[LineInfo]): String = {
 
     import scala.annotation.tailrec;
 

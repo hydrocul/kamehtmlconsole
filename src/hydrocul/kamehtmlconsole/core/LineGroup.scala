@@ -23,7 +23,7 @@ private[kamehtmlconsole] class LineGroupImpl(objectPool: ObjectPool,
 
   @volatile private var lines: Vector[LineBuffer] = Vector();
 
-  def getLine: Vector[ConsoleLineBuffer] = lines;
+  def getLines: Vector[LineBuffer] = lines;
 
   def newLine(): LineBuffer = {
     val ret = new LineBufferImpl(objectPool);
@@ -64,7 +64,7 @@ private[kamehtmlconsole] class LineGroupImpl(objectPool: ObjectPool,
   def size = lines.size;
 
   def getLinesInfo: LinesInfo = {
-    val infos = lines.map(_.getLineInfo).toIndexedSeq;
+    val infos = lines.map(_.getLineInfo);
     val counter = if(lines.isEmpty) 0 else infos.map(_.counter).max;
     LinesInfo(infos, counter);
   }

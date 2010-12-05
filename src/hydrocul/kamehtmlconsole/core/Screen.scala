@@ -1,17 +1,17 @@
-package hydrocul.kamehtmlconsole;
+package hydrocul.kamehtmlconsole.core;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-trait ConsoleScreen {
+trait Screen {
 
   def getRefreshJavaScriptCode(): String;
 
 }
 
-private[kamehtmlconsole] class ConsoleScreenImpl(console: Console) extends ConsoleScreen {
+private[kamehtmlconsole] class ScreenImpl(console: Console) extends Screen {
 
-  private var lines: ConsoleLinesInfo = console.getLinesInfo
+  private var lines: LinesInfo = console.getLinesInfo
 
   def getRefreshJavaScriptCode(): String = {
     val oldLines = lines;
@@ -24,8 +24,8 @@ private[kamehtmlconsole] class ConsoleScreenImpl(console: Console) extends Conso
     }
   }
 
-  private def getRefreshJavaScriptCodeSub(oldLines: IndexedSeq[ConsoleLineInfo],
-    newLines: IndexedSeq[ConsoleLineInfo]): String = {
+  private def getRefreshJavaScriptCodeSub(oldLines: Vector[LineInfo],
+    newLines: VectorSeq[LineInfo]): String = {
 
     import scala.annotation.tailrec;
 
@@ -34,45 +34,45 @@ private[kamehtmlconsole] class ConsoleScreenImpl(console: Console) extends Conso
      * JavaScript code を生成できる。
      */
     @tailrec
-    def sub(oldLines: IndexedSeq[ConsoleLineInfo], newLines: IndexedSeq[ConsoleLineInfo],
-      deleteIndex: Int, prevLine: ConsoleLineInfo, cont: IndexedSeq[PrintWriter=>Unit]):
-      IndexedSeq[PrintWriter=>Unit] = {
+    def sub(oldLines: Vector[LineInfo], newLines: Vector[LineInfo],
+      deleteIndex: Int, prevLine: LineInfo, cont: Vector[PrintWriter=>Unit]):
+      Vector[PrintWriter=>Unit] = {
       val (writer, oldLinesNext, newLinesNext, deleteIndexNext, prevLineNext) = if(oldLines.isEmpty){
         if(newLines.isEmpty){
           return cont;
         } else {
           val newFirst = newLines(0);
           if(prevLine==null){
-            (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)),
+            (((writer: PrintWriter) => LineInfo.printInsertFirst(writer, newFirst)),
               oldLines, newLines.drop(1), 0, newFirst);
           } else {
-            (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)),
+            (((writer: PrintWriter) => LineInfo.printInsertAfter(writer, prevLine, newFirst)),
               oldLines, newLines.drop(1), 0, newFirst);
           }
         }
       } else {
         val oldFirst = oldLines(0);
         if(deleteIndex > 0){
-          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+          (((writer: PrintWriter) => LineInfo.printDelete(writer, oldFirst)),
             oldLines.drop(1), newLines, deleteIndex - 1, prevLine);
         } else if(newLines.isEmpty){
-          (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+          (((writer: PrintWriter) => LineInfo.printDelete(writer, oldFirst)),
             oldLines.drop(1), newLines, 0, prevLine);
         } else {
           val newFirst = newLines(0);
           if(oldFirst.lineId==newFirst.lineId){
-            (((writer: PrintWriter) => ConsoleLineInfo.printUpdate(writer, oldFirst, newFirst)),
+            (((writer: PrintWriter) => LineInfo.printUpdate(writer, oldFirst, newFirst)),
               oldLines.drop(1), newLines.drop(1), 0, newFirst);
           } else {
             val i = oldLines.findIndexOf(_.lineId==newFirst.lineId);
             if(i >= 0){
-              (((writer: PrintWriter) => ConsoleLineInfo.printDelete(writer, oldFirst)),
+              (((writer: PrintWriter) => LineInfo.printDelete(writer, oldFirst)),
                 oldLines.drop(1), newLines, i - 1, prevLine);
             } else if(prevLine==null){
-              (((writer: PrintWriter) => ConsoleLineInfo.printInsertFirst(writer, newFirst)),
+              (((writer: PrintWriter) => LineInfo.printInsertFirst(writer, newFirst)),
                 oldLines, newLines.drop(1), 0, newFirst);
             } else {
-              (((writer: PrintWriter) => ConsoleLineInfo.printInsertAfter(writer, prevLine, newFirst)),
+              (((writer: PrintWriter) => LineInfo.printInsertAfter(writer, prevLine, newFirst)),
                 oldLines, newLines.drop(1), 0, newFirst);
             }
           }

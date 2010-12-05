@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole;
+package hydrocul.kamehtmlconsole.core;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -8,9 +8,9 @@ import java.io.PrintWriter;
 
 import hydrocul.util.ObjectPool;
 
-trait ConsoleHandler {
+trait HttpHandler {
 
-  import ConsoleHandler._;
+  import HttpHandler._;
 
   /**
    *
@@ -21,7 +21,7 @@ trait ConsoleHandler {
 
 }
 
-object ConsoleHandler {
+object HttpHandler {
 
   trait Request {
 
@@ -45,10 +45,10 @@ object ConsoleHandler {
 
 }
 
-private[kamehtmlconsole] class ConsoleHandlerImpl(objectPool: ObjectPool, baseUrl: String,
-    listener: ConsoleListener) extends ConsoleHandler {
+private[kamehtmlconsole] class HttpHandlerImpl(objectPool: ObjectPool, baseUrl: String,
+    listener: ConsoleListener) extends HttpHandler {
 
-  import ConsoleHandler._;
+  import HttpHandler._;
 
   def handle(path: String, request: Request, response: Response){
     if(path.startsWith("/etc/")){
@@ -106,15 +106,15 @@ private[kamehtmlconsole] class ConsoleHandlerImpl(objectPool: ObjectPool, baseUr
   }
 
   private def handleUserInput(path: String, request: Request, response: Response){
-    // TODO
+    // TODO handleUserInput
   }
 
   private def handleConsole(path: String, request: Request, response: Response){
-    // TODO
+    // TODO handleConsole
   }
 
   private def handleHome(path: String, request: Request, response: Response){
-    // TODO
+    // TODO handleHome
   }
 
 }

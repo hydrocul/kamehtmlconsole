@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole;
+package hydrocul.kamehtmlconsole.core;
 
 trait ConsoleListener {
 

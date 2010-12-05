@@ -1,12 +1,12 @@
-package hydrocul.kamehtmlconsole;
+package hydrocul.kamehtmlconsole.core;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
 import hydrocul.util.ObjectPool;
 
-trait ConsoleLineBuffer {
+trait LineBuffer {
 
-  private[kamehtmlconsole] def getLineInfo: ConsoleLineInfo;
+  private[kamehtmlconsole] def getLineInfo: LineInfo;
 
   def updateHtml(html: String);
 
@@ -16,19 +16,19 @@ trait ConsoleLineBuffer {
 
 }
 
-private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) extends ConsoleLineBuffer {
+private[kamehtmlconsole] class LineBufferImpl(objectPool: ObjectPool) extends LineBuffer {
 
-  import ConsoleLineBufferImpl._;
+  import LineBufferImpl._;
 
   private val lineId: String = objectPool.getKey(this);
   @volatile private var counter: Int = globalCounter.incrementAndGet();
   @volatile private var html: String = "";
   @volatile private var text: String = "";
-  @volatile private var javascript: scala.collection.immutable.IndexedSeq[String] = Vector();
+  @volatile private var javascript: Vector[String] = Vector();
   @volatile private var linkedObjects: List[AnyRef] = Nil;
 
-  private[kamehtmlconsole] def getLineInfo: ConsoleLineInfo =
-    new ConsoleLineInfo(lineId, counter, getHtml, javascript);
+  private[kamehtmlconsole] def getLineInfo: LineInfo =
+    new LineInfo(lineId, counter, getHtml, javascript);
 
   private def getHtml: String = if(html.isEmpty) "&nbsp;" else html;
 
@@ -50,7 +50,7 @@ private[kamehtmlconsole] class ConsoleLineBufferImpl(objectPool: ObjectPool) ext
 
 }
 
-private[kamehtmlconsole] object ConsoleLineBufferImpl {
+private[kamehtmlconsole] object LineBufferImpl {
 
   private val globalCounter = new AtomicInteger(0);
 

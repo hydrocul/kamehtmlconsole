@@ -43,10 +43,7 @@ buildlib_build_jar hydrocul-kamehtmlconsole.jar
 ################################
 scaladoc)
 ################################
-if [ ! -d ./scaladoc ] ; then
-mkdir ./scaladoc
-fi
-scaladoc -d scaladoc -classpath "lib/*:class/" -encoding UTF-8 src/hydrocul/kamehtmlconsole/*.scala src/hydrocul/kamehtmlconsole/html/*.scala
+buildlib_scaladoc
 
 ;;
 ################################

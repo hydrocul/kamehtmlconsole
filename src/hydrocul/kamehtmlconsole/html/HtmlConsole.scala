@@ -6,11 +6,11 @@ import java.io.Writer;
 import hydrocul.kameq.scala.Pipe._;
 import hydrocul.util.StringLib;
 
-import hydrocul.kamehtmlconsole._;
+import hydrocul.kamehtmlconsole.core._;
 
-class HtmlConsole(console: Console, group: ConsoleLineGroup){
+class HtmlConsole(console: Console, group: LineGroup){
 
-  private var line: ConsoleLineBuffer = null;
+  private var line: LineBuffer = null;
   private var buf1 = new StringBuilder; // HTML
   private var buf2 = new StringBuilder; // temporary text
   private var isLastCr = false;

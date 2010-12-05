@@ -5,7 +5,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import hydrocul.kametest.Test;
 import hydrocul.util.NumberObjectPool;
 
-import hydrocul.kamehtmlconsole._;
+import hydrocul.kamehtmlconsole.core._;
 
 object HtmlConsoleTest {
 
@@ -13,8 +13,8 @@ object HtmlConsoleTest {
 
     val executor = new ScheduledThreadPoolExecutor(4);
     val objectPool = new NumberObjectPool(executor);
-    val consoleContainer = new ConsoleContainer(objectPool, "/");
-    val console = consoleContainer.createConsole();
+    val container = new Container(objectPool, "/");
+    val console = container.createConsole();
     val screen = console.createScreen();
     val htmlConsole = new HtmlConsole(console, console.newLineGroup());
     val writer = htmlConsole.getPrintWriter;
@@ -76,7 +76,7 @@ object HtmlConsoleTest {
 
   }
 
-  private def testRefreshJavaScriptCode(screen: ConsoleScreen, num: Int, expected: String){
+  private def testRefreshJavaScriptCode(screen: Screen, num: Int, expected: String){
     val actual = screen.getRefreshJavaScriptCode();
     Test.assertEquals(num.toString, expected, actual);
   }

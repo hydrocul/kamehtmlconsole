@@ -6,7 +6,6 @@ import hydrocul.kametest.Test;
 import hydrocul.util.NumberObjectPool;
 
 import hydrocul.kamehtmlconsole._;
-import hydrocul.kamehtmlconsole.core._;
 
 object HtmlConsoleTest {
 
@@ -77,7 +76,7 @@ object HtmlConsoleTest {
 
   }
 
-  private def testRefreshJavaScriptCode(screen: Screen, num: Int, expected: String){
+  private def testRefreshJavaScriptCode(screen: core.Screen, num: Int, expected: String){
     val actual = screen.getRefreshJavaScriptCode();
     Test.assertEquals(num.toString, expected, actual);
   }

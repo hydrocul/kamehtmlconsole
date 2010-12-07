@@ -72,8 +72,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   def size: Int = groups.map(_.size).sum;
 
-  def getLinesInfo: Vector[LineInfo] =
-    groups.map(_.getLinesInfo).flatMap(_.lines);
+  def getLinesInfo: Vector[LineInfo] = groups.flatMap(_.getLinesInfo);
 
   def createScreen(): Screen = new ScreenImpl(this);
 

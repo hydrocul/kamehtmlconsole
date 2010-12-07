@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole.core;
+package hydrocul.kamehtmlconsole;
 
 import hydrocul.kametest.Test;
 

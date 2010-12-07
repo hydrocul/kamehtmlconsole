@@ -6,7 +6,7 @@ import java.io.Writer;
 import hydrocul.kameq.scala.Pipe._;
 import hydrocul.util.StringLib;
 
-import hydrocul.kamehtmlconsole.core._;
+import hydrocul.kamehtmlconsole._;
 
 class HtmlConsole(console: Console, group: LineGroup){
 

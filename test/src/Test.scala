@@ -7,7 +7,7 @@ object Test {
 
   def main(args: Array[String]){
 
-    hydrocul.kamehtmlconsole.core.LineBufferTest.test();
+    hydrocul.kamehtmlconsole.LineBufferTest.test();
     hydrocul.kamehtmlconsole.html.HtmlConsoleTest.test();
 
     println("Success: %d / %d".format(KTest.getSuccessCount, KTest.getTotalCount));

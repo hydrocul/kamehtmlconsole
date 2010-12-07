@@ -76,7 +76,7 @@ object HtmlConsoleTest {
 
   }
 
-  private def testRefreshJavaScriptCode(screen: core.Screen, num: Int, expected: String){
+  private def testRefreshJavaScriptCode(screen: Screen, num: Int, expected: String){
     val actual = screen.getRefreshJavaScriptCode();
     Test.assertEquals(num.toString, expected, actual);
   }

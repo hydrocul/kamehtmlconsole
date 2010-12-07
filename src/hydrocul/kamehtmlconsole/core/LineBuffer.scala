@@ -28,24 +28,33 @@ private[kamehtmlconsole] class LineBufferImpl(objectPool: ObjectPool) extends Li
   @volatile private var linkedObjects: List[AnyRef] = Nil;
 
   private[kamehtmlconsole] def getLineInfo: LineInfo =
-    new LineInfo(lineId, counter, getHtml, javascript);
+    synchronized { new LineInfo(lineId, counter, getHtml, javascript); }
 
-  private def getHtml: String = if(html.isEmpty) "&nbsp;" else html;
+  private def getHtml: String = {
+    val h = html;
+    if(h.isEmpty) "&nbsp;" else h;
+  }
 
   def updateHtml(html: String){
-    this.html = html;
-    this.text = getTextFromHtml(html);
-    counter = globalCounter.incrementAndGet();
+    synchronized {
+      this.html = html;
+      this.text = getTextFromHtml(html);
+      counter = globalCounter.incrementAndGet();
+    }
   }
 
   def appendJavascript(javascript: String){
-    this.javascript = this.javascript :+ javascript;
-    counter = globalCounter.incrementAndGet();
+    synchronized {
+      this.javascript = this.javascript :+ javascript;
+      counter = globalCounter.incrementAndGet();
+    }
   }
 
   def addLinkedObject(obj: AnyRef){
-    linkedObjects = linkedObjects :+ obj;
-    counter = globalCounter.incrementAndGet();
+    synchronized {
+      linkedObjects = linkedObjects :+ obj;
+      counter = globalCounter.incrementAndGet();
+    }
   }
 
 }

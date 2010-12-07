@@ -7,8 +7,6 @@ import hydrocul.util.StringLib;
 case class LineInfo(lineId: String, counter: Int, html: String,
   javascript: Vector[String]);
 
-case class LinesInfo(lines: Vector[LineInfo], counter: Int); // TODO remove this class
-
 private[kamehtmlconsole] object LineInfo {
 
   def printInsertFirst(writer: PrintWriter, newLine: LineInfo){

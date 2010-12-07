@@ -11,17 +11,13 @@ trait Screen {
 
 private[kamehtmlconsole] class ScreenImpl(console: Console) extends Screen {
 
-  private var lines: LinesInfo = console.getLinesInfo
+  private var lines: Vector[LineInfo] = console.getLinesInfo;
 
   def getRefreshJavaScriptCode(): String = {
     val oldLines = lines;
     val newLines = console.getLinesInfo;
     lines = newLines;
-    if(oldLines.counter==newLines.counter){
-      "";
-    } else {
-      getRefreshJavaScriptCodeSub(oldLines.lines, newLines.lines);
-    }
+    getRefreshJavaScriptCodeSub(oldLines, newLines);
   }
 
   private def getRefreshJavaScriptCodeSub(oldLines: Vector[LineInfo],

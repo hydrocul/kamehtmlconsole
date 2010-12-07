@@ -14,7 +14,7 @@ trait Console {
 
   def size: Int;
 
-  def getLinesInfo: LinesInfo;
+  def getLinesInfo: Vector[LineInfo];
 
   def createScreen(): Screen;
 
@@ -30,27 +30,33 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   def newLineGroup(): LineGroup = {
     val ret = new LineGroupImpl(objectPool, groupListener);
-    groups = groups :+ ret;
+    synchronized {
+      groups = groups :+ ret;
+    }
     return ret;
   }
 
   def newLineGroupBefore(after: LineGroup): LineGroup = {
-    val i = groups.indexOf(after);
-    if(i < 0){
-      return new LineGroupImpl(objectPool, groupListener);
-    }
     val ret = new LineGroupImpl(objectPool, groupListener);
-    groups = (groups.take(i) :+ ret) ++ groups.drop(i);
+    synchronized {
+      val i = groups.indexOf(after);
+      if(i < 0){
+        return ret; // don't insert the new line
+      }
+      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
+    }
     ret;
   }
 
   def newLineGroupAfter(before: LineGroup): LineGroup = {
-    val i = groups.indexOf(before) + 1;
-    if(i <= 0){
-      return new LineGroupImpl(objectPool, groupListener);
-    }
     val ret = new LineGroupImpl(objectPool, groupListener);
-    groups = (groups.take(i) :+ ret) ++ groups.drop(i);
+    synchronized {
+      val i = groups.indexOf(before) + 1;
+      if(i <= 0){
+        return ret; // don't insert the new line
+      }
+      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
+    }
     ret;
   }
 
@@ -66,12 +72,8 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   def size: Int = groups.map(_.size).sum;
 
-  def getLinesInfo: LinesInfo = {
-    val g = groups.map(_.getLinesInfo);
-    val infos = g.flatMap(_.lines);
-    val counter = if(g.isEmpty) 0 else g.map(_.counter).max;
-    LinesInfo(infos, counter);
-  }
+  def getLinesInfo: Vector[LineInfo] =
+    groups.map(_.getLinesInfo).flatMap(_.lines);
 
   def createScreen(): Screen = new ScreenImpl(this);
 

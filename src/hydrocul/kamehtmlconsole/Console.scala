@@ -1,23 +1,22 @@
 package hydrocul.kamehtmlconsole;
 
-import hydrocul.kameq.scala.Pipe._;
 import hydrocul.util.ObjectPool;
 
 trait Console {
 
   def getLoadingHtml: String;
 
-  def newLineGroup(): ConsoleLineGroup;
+  def newLineGroup(): LineGroup;
 
-  def newLineGroupBefore(after: ConsoleLineGroup): ConsoleLineGroup;
+  def newLineGroupBefore(after: LineGroup): LineGroup;
 
-  def newLineGroupAfter(before: ConsoleLineGroup): ConsoleLineGroup;
+  def newLineGroupAfter(before: LineGroup): LineGroup;
 
   def size: Int;
 
-  def getLinesInfo: ConsoleLinesInfo;
+  def getLinesInfo: Vector[LineInfo];
 
-  def createScreen(): ConsoleScreen;
+  def createScreen(): Screen;
 
 }
 
@@ -25,33 +24,39 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   import ConsoleImpl._;
 
-  @volatile private var groups: IndexedSeq[ConsoleLineGroupImpl] = Vector();
+  @volatile private var groups: Vector[LineGroupImpl] = Vector();
 
   def getLoadingHtml = "<img src=\"" + baseUrl + "etc/loading.gif\" width=\"16\" height=\"16\" border=\"0\" alt=\"loading\" />";
 
-  def newLineGroup(): ConsoleLineGroup = {
-    val ret = new ConsoleLineGroupImpl(objectPool, groupListener);
-    groups = groups :+ ret;
+  def newLineGroup(): LineGroup = {
+    val ret = new LineGroupImpl(objectPool, groupListener);
+    synchronized {
+      groups = groups :+ ret;
+    }
     return ret;
   }
 
-  def newLineGroupBefore(after: ConsoleLineGroup): ConsoleLineGroup = {
-    val i = groups.indexOf(after);
-    if(i < 0){
-      return new ConsoleLineGroupImpl(objectPool, groupListener);
+  def newLineGroupBefore(after: LineGroup): LineGroup = {
+    val ret = new LineGroupImpl(objectPool, groupListener);
+    synchronized {
+      val i = groups.indexOf(after);
+      if(i < 0){
+        return ret; // don't insert the new line
+      }
+      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     }
-    val ret = new ConsoleLineGroupImpl(objectPool, groupListener);
-    groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     ret;
   }
 
-  def newLineGroupAfter(before: ConsoleLineGroup): ConsoleLineGroup = {
-    val i = groups.indexOf(before) + 1;
-    if(i <= 0){
-      return new ConsoleLineGroupImpl(objectPool, groupListener);
+  def newLineGroupAfter(before: LineGroup): LineGroup = {
+    val ret = new LineGroupImpl(objectPool, groupListener);
+    synchronized {
+      val i = groups.indexOf(before) + 1;
+      if(i <= 0){
+        return ret; // don't insert the new line
+      }
+      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     }
-    val ret = new ConsoleLineGroupImpl(objectPool, groupListener);
-    groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     ret;
   }
 
@@ -59,7 +64,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
     // TODO #limitLineCount
   }
 
-  private val groupListener = new ConsoleLineGroupImpl.Listener {
+  private val groupListener = new LineGroupImpl.Listener {
     def limitLineCount(){
       ConsoleImpl.this.limitLineCount();
     }
@@ -67,14 +72,9 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   def size: Int = groups.map(_.size).sum;
 
-  def getLinesInfo: ConsoleLinesInfo = {
-    val g = groups.map(_.getLinesInfo);
-    val infos = g.flatMap(_.lines).toIndexedSeq;
-    val counter = if(g.isEmpty) 0 else g.map(_.counter).max;
-    ConsoleLinesInfo(infos, counter);
-  }
+  def getLinesInfo: Vector[LineInfo] = groups.flatMap(_.getLinesInfo);
 
-  def createScreen(): ConsoleScreen = new ConsoleScreenImpl(this);
+  def createScreen(): Screen = new ScreenImpl(this);
 
 }
 

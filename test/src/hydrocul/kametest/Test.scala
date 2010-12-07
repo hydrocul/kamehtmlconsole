@@ -15,6 +15,8 @@ object Test {
 
   def getErrorCount = _errorCount;
 
+  def getTotalCount = _successCount + _errorCount;
+
   def assertEquals[A](name: String, expected: A, actual: A){
     if(actual==expected){
       _successCount = _successCount + 1;

@@ -2,19 +2,14 @@ package hydrocul.kamehtmlconsole;
 
 import java.io.PrintWriter;
 
-import scala.collection.immutable.IndexedSeq;
-
 import hydrocul.util.StringLib;
 
-case class ConsoleLineInfo(lineId: String, counter: Int, html: String,
-  javascript: IndexedSeq[String]);
+case class LineInfo(lineId: String, counter: Int, html: String,
+  javascript: Vector[String]);
 
-case class ConsoleLinesInfo(lines: IndexedSeq[ConsoleLineInfo], counter: Int);
+private[kamehtmlconsole] object LineInfo {
 
-private[kamehtmlconsole]
-object ConsoleLineInfo {
-
-  def printInsertFirst(writer: PrintWriter, newLine: ConsoleLineInfo){
+  def printInsertFirst(writer: PrintWriter, newLine: LineInfo){
     writer.print("$(\"#console\").prepend(\"<div id=\\\"");
     writer.print(newLine.lineId);
     writer.print("\\\" class=\\\"line\\\">");
@@ -27,7 +22,7 @@ object ConsoleLineInfo {
       writer, newLine.lineId, _));
   }
 
-  def printInsertAfter(writer: PrintWriter, prevLine: ConsoleLineInfo, newLine: ConsoleLineInfo){
+  def printInsertAfter(writer: PrintWriter, prevLine: LineInfo, newLine: LineInfo){
     writer.print("$(\"#");
     writer.print(prevLine.lineId);
     writer.print("\").after(\"<div id=\\\"");
@@ -42,8 +37,7 @@ object ConsoleLineInfo {
       writer, newLine.lineId, _));
   }
 
-  def printUpdate(writer: PrintWriter,
-    oldLine: ConsoleLineInfo, newLine: ConsoleLineInfo){
+  def printUpdate(writer: PrintWriter, oldLine: LineInfo, newLine: LineInfo){
 
     assert(oldLine.lineId == newLine.lineId);
     if(oldLine.counter != newLine.counter){
@@ -62,8 +56,7 @@ object ConsoleLineInfo {
     }
   }
 
-  def printDelete(writer: PrintWriter,
-    oldLine: ConsoleLineInfo){
+  def printDelete(writer: PrintWriter, oldLine: LineInfo){
 
     writer.print("$(\"#");
     writer.print(oldLine.lineId);

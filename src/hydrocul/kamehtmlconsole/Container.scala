@@ -5,11 +5,11 @@ import hydrocul.util.ObjectPool;
 /**
  * @param baseUrl ends with "/"
  */
-class ConsoleContainer(objectPool: ObjectPool, baseUrl: String){
+class Container(objectPool: ObjectPool, baseUrl: String){
 
-  private var listeners: IndexedSeq[ConsoleListener] = Vector();
+  private var listeners: Vector[ConsoleListener] = Vector();
 
-  private val handler = new ConsoleHandlerImpl(objectPool, baseUrl, new ConsoleListener(){
+  private val handler = new HttpHandlerImpl(objectPool, baseUrl, new ConsoleListener(){
 
     def userText(count: Int, text: String){
       listeners.foreach(_.userText(count, text));
@@ -29,7 +29,7 @@ class ConsoleContainer(objectPool: ObjectPool, baseUrl: String){
     listeners = listeners :+ listener;
   }
 
-  def getHandler: ConsoleHandler = handler;
+  def getHandler: HttpHandler = handler;
 
   /**
    * `Console` のインスタンスを生成する。

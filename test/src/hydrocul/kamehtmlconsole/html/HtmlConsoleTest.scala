@@ -13,24 +13,25 @@ object HtmlConsoleTest {
 
     val executor = new ScheduledThreadPoolExecutor(4);
     val objectPool = new NumberObjectPool(executor);
-    val consoleContainer = new ConsoleContainer(objectPool, "/");
-    val console = consoleContainer.createConsole();
+    val container = new Container(objectPool, "/");
+    val console = container.createConsole();
     val screen = console.createScreen();
     val htmlConsole = new HtmlConsole(console, console.newLineGroup());
     val writer = htmlConsole.getPrintWriter;
+    val htmlWriter = htmlConsole.getHtmlPrintWriter;
 
     testRefreshJavaScriptCode(screen, 1, "");
 
     writer.print("abc");
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 2, "");
 
     writer.flush();
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 3, """$("#console").prepend("<div id=\"1\" class=\"line\">abc</div>");initLine("1");""" + "\n");
 
     writer.print("def");
-    Thread.sleep(100);
+    Thread.sleep(200);
     testRefreshJavaScriptCode(screen, 4, "");
 
     writer.flush();
@@ -53,9 +54,29 @@ object HtmlConsoleTest {
     Thread.sleep(100);
     testRefreshJavaScriptCode(screen, 9, """$("#2").html("&amp;");initLine("2");""" + "\n");
 
+    writer.print("<");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 10, "");
+
+    writer.flush();
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 11, """$("#2").html("&amp;&lt;");initLine("2");""" + "\n");
+
+    writer.print(">\n");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 12, """$("#2").html("&amp;&lt;&gt;");initLine("2");""" + "\n");
+
+    htmlWriter.print("&lt;&amp;&gt;");
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 13, "");
+
+    htmlWriter.flush();
+    Thread.sleep(100);
+    testRefreshJavaScriptCode(screen, 14, """$("#2").after("<div id=\"3\" class=\"line\">&lt;&amp;&gt;</div>");initLine("3");""" + "\n");
+
   }
 
-  private def testRefreshJavaScriptCode(screen: ConsoleScreen, num: Int, expected: String){
+  private def testRefreshJavaScriptCode(screen: Screen, num: Int, expected: String){
     val actual = screen.getRefreshJavaScriptCode();
     Test.assertEquals(num.toString, expected, actual);
   }

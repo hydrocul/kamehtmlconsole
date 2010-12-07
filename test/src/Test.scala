@@ -7,12 +7,15 @@ object Test {
 
   def main(args: Array[String]){
 
-    hydrocul.kamehtmlconsole.ConsoleLineBufferTest.test();
+    hydrocul.kamehtmlconsole.LineBufferTest.test();
     hydrocul.kamehtmlconsole.html.HtmlConsoleTest.test();
+
+    println("Success: %d / %d".format(KTest.getSuccessCount, KTest.getTotalCount));
 
     if(KTest.errorExists){
       System.exit(1);
     }
+    System.exit(0);
 
   }
 

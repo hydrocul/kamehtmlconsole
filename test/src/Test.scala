@@ -9,6 +9,7 @@ object Test {
 
     hydrocul.kamehtmlconsole.LineBufferTest.test();
     hydrocul.kamehtmlconsole.KeyEventTest.test();
+    hydrocul.kamehtmlconsole.GoogleImeEngineTest.test();
     hydrocul.kamehtmlconsole.html.HtmlConsoleTest.test();
 
     println("Success: %d / %d".format(KTest.getSuccessCount, KTest.getTotalCount));

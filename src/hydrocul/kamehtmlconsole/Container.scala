@@ -11,16 +11,8 @@ class Container(objectPool: ObjectPool, baseUrl: String){
 
   private val handler = new HttpHandlerImpl(objectPool, baseUrl, new ConsoleListener(){
 
-    def userText(count: Int, text: String){
-      listeners.foreach(_.userText(count, text));
-    }
-
-    def specialKey(count: Int, key: String){
-      listeners.foreach(_.specialKey(count, key));
-    }
-
-    def specialCommand(count: Int, command: String){
-      listeners.foreach(_.specialCommand(count, command));
+    def input(event: KeyEvent){
+      listeners.foreach(_.input(event));
     }
 
   });

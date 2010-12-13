@@ -15,18 +15,21 @@ object GoogleImeEngine extends ImeEngine {
 
   def searchSuggestions(text: String, listener: ImeEngineListener){
 
+    val text2 = text; // TODO
+
     ioexec {
       accessGoogleAPI(text2);
     } | { result: List[APIResponseItem] =>
+      null; // TODO
     }
 
   }
 
   private[kamehtmlconsole] def extractRoma(text: String): String = {
-    // TODO extractRoma
+    "" // TODO extractRoma
   }
 
-  private romaPattern = "\\A.*?([a-z][-a-z])\\z".r;
+  private val romaPattern = "\\A.*?([a-z][-a-z])\\z".r;
 
   private[kamehtmlconsole] def accessGoogleAPI(text: String): List[APIResponseItem] = {
 

@@ -2,6 +2,13 @@ package hydrocul.kamehtmlconsole;
 
 import hydrocul.util.ObjectPool;
 
+/**
+ * 一連の Line を表すクラス。
+ * 
+ * コンソールに表示される文字などを操作するには、
+ * newLine, newLineBefore, newLineAfter, LineBuffer#updateHtml などを呼び出す。
+ * PrintWriter を使って操作したい場合は、 このLineGroup を HtmlConsole でラップする。
+ */
 trait LineGroup {
 
   def getLines: Vector[LineBuffer];

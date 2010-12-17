@@ -22,7 +22,8 @@ trait ImeEngineSuggestion {
 
 }
 
-class StdImeEngineSuggestion(val caption: String, len: Int) extends ImeEngineSuggestion {
+class StdImeEngineSuggestion(val caption: String, len: Int,
+  executed: =>Unit) extends ImeEngineSuggestion {
 
   def keyEvents: List[KeyEvent] = {
 
@@ -40,3 +41,11 @@ class StdImeEngineSuggestion(val caption: String, len: Int) extends ImeEngineSug
   }
 
 }
+
+object StdImeEngineSuggestion {
+
+  def apply(caption: String, len: Int) = new StdImeEngineSuggestion(
+    caption, len, ());
+
+}
+

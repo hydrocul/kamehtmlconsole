@@ -5,6 +5,17 @@ trait KeyEvent;
 case class UserTextKeyEvent(text: String) extends KeyEvent {
 }
 
+/**
+ * HTML上の $("a.click-event") をクリックした時にこのイベントが発生する。
+ *
+ * このイベントは ConsoleListener に渡されることなく、直ちに run が呼び出される。
+ */
+trait ClickKeyEvent extends KeyEvent {
+
+  def run();
+
+}
+
 case class SpecialKeyEvent(key: SpecialKeyEvent.SpecialKey,
   alt: Boolean, ctrl: Boolean, shift: Boolean) extends KeyEvent {
 

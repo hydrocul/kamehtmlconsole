@@ -20,10 +20,14 @@ trait ImeEngineSuggestion {
 
   def keyEvents: List[KeyEvent];
 
+  def executed(): Unit;
+
 }
 
 class StdImeEngineSuggestion(val caption: String, len: Int,
-  executed: =>Unit) extends ImeEngineSuggestion {
+  executedProcess: =>Unit) extends ImeEngineSuggestion {
+
+  def this(caption: String, len: Int) = this(caption, len, ());
 
   def keyEvents: List[KeyEvent] = {
 
@@ -40,12 +44,9 @@ class StdImeEngineSuggestion(val caption: String, len: Int,
 
   }
 
-}
-
-object StdImeEngineSuggestion {
-
-  def apply(caption: String, len: Int) = new StdImeEngineSuggestion(
-    caption, len, ());
+  def executed(): Unit = executedProcess;
 
 }
+
+
 

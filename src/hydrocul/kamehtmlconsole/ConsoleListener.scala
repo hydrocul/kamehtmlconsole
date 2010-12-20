@@ -2,10 +2,11 @@ package hydrocul.kamehtmlconsole;
 
 trait ConsoleListener {
 
-  def userText(count: Int, text: String);
-
-  def specialKey(count: Int, key: String);
-
-  def specialCommand(count: Int, command: String);
+  /**
+   * ユーザからの入力などを受け付ける。
+   *
+   * 複数のスレッドから同時に呼び出されることはない。
+   */
+  def input(event: KeyEvent);
 
 }

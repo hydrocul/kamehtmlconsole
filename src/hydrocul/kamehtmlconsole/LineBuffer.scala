@@ -14,6 +14,8 @@ trait LineBuffer {
 
   def addLinkedObject(obj: AnyRef);
 
+  def clearLinkedObject();
+
 }
 
 private[kamehtmlconsole] class LineBufferImpl(objectPool: ObjectPool) extends LineBuffer {
@@ -53,6 +55,13 @@ private[kamehtmlconsole] class LineBufferImpl(objectPool: ObjectPool) extends Li
   def addLinkedObject(obj: AnyRef){
     synchronized {
       linkedObjects = linkedObjects :+ obj;
+      counter = globalCounter.incrementAndGet();
+    }
+  }
+
+  def clearLinkedObject(){
+    synchronized {
+      linkedObjects = Nil;
       counter = globalCounter.incrementAndGet();
     }
   }

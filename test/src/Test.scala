@@ -7,6 +7,8 @@ object Test {
 
   def main(args: Array[String]){
 
+    TestKameq.main(args);
+
     hydrocul.kamehtmlconsole.LineBufferTest.test();
     hydrocul.kamehtmlconsole.html.HtmlConsoleTest.test();
 

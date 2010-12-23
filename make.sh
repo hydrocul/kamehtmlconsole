@@ -16,7 +16,8 @@ compile)
 buildlib_mkdir_lib
 if [ $? -ne 0 ] ; then
 #buildlib_dl_kameutil
-buildlib_dl_kameq
+#buildlib_dl_kameq
+buildlib_dl_scalastm
 fi
 
 buildlib_compile

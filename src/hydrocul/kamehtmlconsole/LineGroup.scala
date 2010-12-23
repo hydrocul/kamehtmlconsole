@@ -1,5 +1,8 @@
 package hydrocul.kamehtmlconsole;
 
+import scala.concurrent.stm.atomic;
+import scala.concurrent.stm.Ref;
+
 import hydrocul.util.ObjectPool;
 
 /**
@@ -28,14 +31,14 @@ trait LineGroup {
 private[kamehtmlconsole] class LineGroupImpl(objectPool: ObjectPool,
   listener: LineGroupImpl.Listener) extends LineGroup {
 
-  @volatile private var lines: Vector[LineBuffer] = Vector();
+  private val lines: Ref[Vector[LineBuffer]] = Ref(Vector());
 
-  def getLines: Vector[LineBuffer] = lines;
+  def getLines: Vector[LineBuffer] = lines.single();
 
   def newLine(): LineBuffer = {
     val ret = new LineBufferImpl(objectPool);
-    synchronized {
-      lines = lines :+ ret;
+    atomic { implicit txn =>
+      lines() = lines() :+ ret;
     }
     limitLineCount();
     ret;
@@ -43,12 +46,11 @@ private[kamehtmlconsole] class LineGroupImpl(objectPool: ObjectPool,
 
   def newLineBefore(after: LineBuffer): LineBuffer = {
     val ret = new LineBufferImpl(objectPool);
-    synchronized {
-      val i = lines.indexOf(after);
-      if(i < 0){
-        return ret;
+    atomic { implicit txn =>
+      val i = lines().indexOf(after);
+      if(i >= 0){
+        lines() = (lines().take(i) :+ ret) ++ lines().drop(i);
       }
-      lines = (lines.take(i) :+ ret) ++ lines.drop(i);
     }
     limitLineCount();
     ret;
@@ -56,29 +58,28 @@ private[kamehtmlconsole] class LineGroupImpl(objectPool: ObjectPool,
 
   def newLineAfter(before: LineBuffer): LineBuffer = {
     val ret = new LineBufferImpl(objectPool);
-    synchronized {
-      val i = lines.indexOf(before) + 1;
-      if(i <= 0){
-        return ret;
+    atomic { implicit txt =>
+      val i = lines().indexOf(before) + 1;
+      if(i > 0){
+        lines() = (lines().take(i) :+ ret) ++ lines().drop(i);
       }
-      lines = (lines.take(i) :+ ret) ++ lines.drop(i);
     }
     limitLineCount();
     ret;
   }
 
   private def limitLineCount(){
-    synchronized {
-      val s = lines.size;
+    atomic { implicit txn =>
+      val s = lines().size;
       if(s > ConsoleImpl.maxLineCount){
-        lines = lines.drop(s - ConsoleImpl.maxLineCount);
+        lines() = lines().drop(s - ConsoleImpl.maxLineCount);
       }
     }
   }
 
-  def size = lines.size;
+  def size = lines.single().size;
 
-  def getLinesInfo: Vector[LineInfo] = lines.map(_.getLineInfo);
+  def getLinesInfo: Vector[LineInfo] = lines.single().map(_.getLineInfo);
 
 }
 

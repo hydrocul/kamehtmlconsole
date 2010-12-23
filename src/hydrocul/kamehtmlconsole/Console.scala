@@ -1,5 +1,8 @@
 package hydrocul.kamehtmlconsole;
 
+import scala.concurrent.stm.atomic;
+import scala.concurrent.stm.Ref;
+
 import hydrocul.util.ObjectPool;
 
 trait Console {
@@ -24,38 +27,36 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
 
   import ConsoleImpl._;
 
-  @volatile private var groups: Vector[LineGroupImpl] = Vector();
+  private val groups: Ref[Vector[LineGroupImpl]] = Ref(Vector());
 
   def getLoadingHtml = "<img src=\"" + baseUrl + "etc/loading.gif\" width=\"16\" height=\"16\" border=\"0\" alt=\"loading\" />";
 
   def newLineGroup(): LineGroup = {
     val ret = new LineGroupImpl(objectPool, groupListener);
-    synchronized {
-      groups = groups :+ ret;
+    atomic { implicit txn =>
+      groups() = groups() :+ ret;
     }
     return ret;
   }
 
   def newLineGroupBefore(after: LineGroup): LineGroup = {
     val ret = new LineGroupImpl(objectPool, groupListener);
-    synchronized {
-      val i = groups.indexOf(after);
-      if(i < 0){
-        return ret; // don't insert the new line
+    atomic { implicit txn =>
+      val i = groups().indexOf(after);
+      if(i >= 0){
+        groups() = (groups().take(i) :+ ret) ++ groups().drop(i);
       }
-      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     }
     ret;
   }
 
   def newLineGroupAfter(before: LineGroup): LineGroup = {
     val ret = new LineGroupImpl(objectPool, groupListener);
-    synchronized {
-      val i = groups.indexOf(before) + 1;
-      if(i <= 0){
-        return ret; // don't insert the new line
+    atomic { implicit txn =>
+      val i = groups().indexOf(before) + 1;
+      if(i > 0){
+        groups() = (groups().take(i) :+ ret) ++ groups().drop(i);
       }
-      groups = (groups.take(i) :+ ret) ++ groups.drop(i);
     }
     ret;
   }
@@ -70,9 +71,9 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
     }
   }
 
-  def size: Int = groups.map(_.size).sum;
+  def size: Int = groups.single().map(_.size).sum;
 
-  def getLinesInfo: Vector[LineInfo] = groups.flatMap(_.getLinesInfo);
+  def getLinesInfo: Vector[LineInfo] = groups.single().flatMap(_.getLinesInfo);
 
   def createScreen(): Screen = new ScreenImpl(this);
 

@@ -2,6 +2,9 @@ package hydrocul.kamehtmlconsole;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import scala.concurrent.stm.atomic;
+import scala.concurrent.stm.Ref;
+
 import hydrocul.util.ObjectPool;
 
 trait LineBuffer {
@@ -23,46 +26,48 @@ private[kamehtmlconsole] class LineBufferImpl(objectPool: ObjectPool) extends Li
   import LineBufferImpl._;
 
   private val lineId: String = objectPool.getKey(this);
-  @volatile private var counter: Int = globalCounter.incrementAndGet();
-  @volatile private var html: String = "";
-  @volatile private var text: String = "";
-  @volatile private var javascript: Vector[String] = Vector();
-  @volatile private var linkedObjects: List[AnyRef] = Nil;
+  private val counter: Ref[Int] = Ref(globalCounter.incrementAndGet());
+  private val html: Ref[String] = Ref("");
+  private val text: Ref[String] = Ref("");
+  private val javascript: Ref[Vector[String]] = Ref(Vector());
+  private val linkedObjects: Ref[List[AnyRef]] = Ref(Nil);
 
-  private[kamehtmlconsole] def getLineInfo: LineInfo =
-    synchronized { new LineInfo(lineId, counter, getHtml, javascript); }
-
-  private def getHtml: String = {
-    val h = html;
-    if(h.isEmpty) "&nbsp;" else h;
+  private[kamehtmlconsole] def getLineInfo: LineInfo = {
+    atomic { implicit txn =>
+      val h = {
+        val h = html();
+        if(h.isEmpty) "&nbsp;" else h;
+      }
+      new LineInfo(lineId, counter(), h, javascript());
+    }
   }
 
   def updateHtml(html: String){
-    synchronized {
-      this.html = html;
-      this.text = getTextFromHtml(html);
-      counter = globalCounter.incrementAndGet();
+    atomic { implicit txn =>
+      this.html() = html;
+      this.text() = getTextFromHtml(html);
+      counter() = globalCounter.incrementAndGet();
     }
   }
 
   def appendJavascript(javascript: String){
-    synchronized {
-      this.javascript = this.javascript :+ javascript;
-      counter = globalCounter.incrementAndGet();
+    atomic { implicit txn =>
+      this.javascript() = this.javascript() :+ javascript;
+      counter() = globalCounter.incrementAndGet();
     }
   }
 
   def addLinkedObject(obj: AnyRef){
-    synchronized {
-      linkedObjects = linkedObjects :+ obj;
-      counter = globalCounter.incrementAndGet();
+    atomic { implicit txn =>
+      linkedObjects() = linkedObjects() :+ obj;
+      counter() = globalCounter.incrementAndGet();
     }
   }
 
   def clearLinkedObject(){
-    synchronized {
-      linkedObjects = Nil;
-      counter = globalCounter.incrementAndGet();
+    atomic { implicit txn =>
+      linkedObjects() = Nil;
+      counter() = globalCounter.incrementAndGet();
     }
   }
 

@@ -1,6 +1,7 @@
 package hydrocul.kamehtmlconsole;
 
 import java.util.{ List => JList }
+import java.util.concurrent.Executor;
 
 import scala.collection.JavaConversions._;
 import scala.io.BufferedSource;
@@ -8,11 +9,10 @@ import scala.io.Source;
 
 import net.arnx.jsonic.JSON;
 
-import hydrocul.kameq.scala.Pipe.ioexec;
 import hydrocul.util.RomaKanaHenkan;
 import hydrocul.util.StringLib;
 
-object GoogleImeEngine extends ImeEngine {
+class GoogleImeEngine(executor: Executor) extends ImeEngine {
 
   def searchSuggestions(text: String, listener: ImeEngineListener){
 

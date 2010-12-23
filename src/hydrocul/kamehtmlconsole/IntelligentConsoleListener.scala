@@ -1,70 +1,71 @@
 package hydrocul.kamehtmlconsole;
 
-import hydrocul.kameq.scala.Pipe.exec;
-import hydrocul.kameq.scala.Pipe.synexec;
+import java.util.concurrent.Executor;
+
+import scala.concurrent.stm.atomic;
+import scala.concurrent.stm.Ref;
+
 import hydrocul.util.ObjectPool;
+import hydrocul.util.ScalaUtil.block2runnable;
 
 class IntelligentConsoleListener(nextListener: ConsoleListener,
   mainImeEngine: ImeEngine, lineGroup: LineGroup,
-  objectPool: ObjectPool) extends ConsoleListener {
+  objectPool: ObjectPool, executor: Executor) extends ConsoleListener {
 
   private val line: LineBuffer = lineGroup.newLine();
-  private val buf: StringBuilder = new StringBuilder();
+  private val buf: Ref[String] = Ref("");
 
-  def input(event: KeyEvent){
+  def input(event: KeyEvent, onComplete: Runnable){
     import SpecialKeyEvent._;
     event match {
-      case UserTextKeyEvent(text) => inputText(event,text);
-      case SpecialKeyEvent(Backspace, false, false, false) => inputBackspace(event);
-      case _ => inputOther(event);
+      case UserTextKeyEvent(text) => inputText(event, onComplete, text);
+      case SpecialKeyEvent(Backspace, false, false, false) => inputBackspace(event, onComplete);
+      case _ => inputOther(event, onComplete);
     }
   }
 
   def setTextBuffer(text: String){
-    synexec(this){
-      val len = buf.length;
-      buf.delete(0, len);
-      buf.append(text);
-      searchSuggestions();
+    atomic { implicit txn =>
+      buf() = text;
+      searchSuggestions(text);
     }
   }
 
-  private def inputText(event: KeyEvent, text: String){
-    nextListener.input(event);
-    synexec(this){
-      buf.append(text);
-      searchSuggestions();
+  private def inputText(event: KeyEvent, onComplete: Runnable, text: String){
+    nextListener.input(event, onComplete);
+    atomic { implicit txn =>
+      buf() = buf() + text;
+      searchSuggestions(buf());
     }
   }
 
-  private def inputBackspace(event: KeyEvent){
-    nextListener.input(event);
-    synexec(this){
-      val len = buf.length;
+  private def inputBackspace(event: KeyEvent, onComplete: Runnable){
+    nextListener.input(event, onComplete);
+    atomic { implicit txn =>
+      val b = buf();
+      val len = b.length;
       if(len > 0){
-        buf.delete(len - 1, len);
-        searchSuggestions();
+        buf() = b.substring(0, len - 1);
+        searchSuggestions(buf());
       }
     }
   }
 
-  private def inputOther(event: KeyEvent){
-    nextListener.input(event);
-    synexec(this){
-      val len = buf.length;
-      buf.delete(0, len);
-      searchSuggestions();
+  private def inputOther(event: KeyEvent, onComplete: Runnable){
+    nextListener.input(event, onComplete);
+    atomic { implicit txn =>
+      buf() = "";
+      searchSuggestions("");
     }
   }
 
-  private def searchSuggestions(){
-    val t = buf.toString;
-    if(t.length==0){
+  private def searchSuggestions(text: String){
+    if(text.length==0){
       displaySuggestions(Nil);
     } else {
-      mainImeEngine.searchSuggestions(t, new ImeEngineListener {
+      mainImeEngine.searchSuggestions(text, new ImeEngineListener {
         def receiveSuggestions(suggestions: List[ImeEngineSuggestion]){
-          if(buf.toString==t){
+          if(buf.single()==text){
             displaySuggestions(suggestions);
           }
         }
@@ -73,12 +74,11 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
   }
 
   private def displaySuggestions(suggestions: List[ImeEngineSuggestion]){
-    synexec(line){
+    atomic { implicit txn =>
       line.clearLinkedObject();
       val html = suggestions.map { s =>
         val event = new ClickKeyEvent {
           def run(){
-            // ここは他のキーボードイベントと同時に実行されることはない
             pickupSuggestion(s);
           }
         }
@@ -91,12 +91,13 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
   }
 
   private def pickupSuggestion(suggestion: ImeEngineSuggestion){
-    suggestion.keyEvents.foreach { e =>
-      input(e);
+    def exec(events: List[KeyEvent]){
+      events match {
+        case Nil => executor.execute { suggestion.executed(); }
+        case head :: tail => executor.execute { input(head, { exec(tail); }); }
+      }
     }
-    exec {
-      suggestion.executed();
-    }
+    exec(suggestion.keyEvents);
   }
 
 }

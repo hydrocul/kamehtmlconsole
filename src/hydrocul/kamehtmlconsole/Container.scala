@@ -12,7 +12,7 @@ class Container(objectPool: ObjectPool, baseUrl: String){
   private val handler = new HttpHandlerImpl(objectPool, baseUrl, new ConsoleListener(){
 
     def input(event: KeyEvent){
-      listeners.foreach(_.input(event));
+      listeners.foreach(_.input(event), {}); // TODO 入力を複数同時に処理しない仕組みが必要
     }
 
   });

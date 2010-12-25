@@ -3,7 +3,9 @@ package hydrocul.kamehtmlconsole.html;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import hydrocul.kameq.scala.Pipe._;
+import scala.concurrent.stm.atomic;
+import scala.concurrent.stm.Ref;
+
 import hydrocul.util.StringLib;
 
 import hydrocul.kamehtmlconsole._;

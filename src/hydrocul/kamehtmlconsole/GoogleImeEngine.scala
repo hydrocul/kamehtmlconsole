@@ -10,6 +10,7 @@ import scala.io.Source;
 import net.arnx.jsonic.JSON;
 
 import hydrocul.util.RomaKanaHenkan;
+import hydrocul.util.ScalaUtil.using;
 import hydrocul.util.StringLib;
 
 class GoogleImeEngine(executor: Executor) extends ImeEngine {
@@ -42,19 +43,12 @@ class GoogleImeEngine(executor: Executor) extends ImeEngine {
 
   private[kamehtmlconsole] def accessGoogleAPI(text: String): List[APIResponseItem] = {
 
-    def using[A <: { def close(); }, B](resource: A)(p: A=>B): B = {
-      try {
-        p(resource);
-      } finally {
-        resource.close();
-      }
-    }
-
     val apiUrl = "http://www.google.com/transliterate?langpair=ja-Hira|ja&text=" +
       StringLib.encodeUrl(text);
-    val response: String = using(Source.fromURL(apiUrl, "UTF-8")){ s: BufferedSource =>
+    val response: String = using(Source.fromURL(apiUrl, "UTF-8")){ s =>
       s.getLines.mkString("\n"); }
-    val list: List[AnyRef] = JSON.decode[JList[AnyRef]](response).toList.filter(_ != null);
+    val list: List[AnyRef] = JSON.decode[JList[AnyRef]](response).toList.
+      filter(_ != null);
 
     list.map(_.asInstanceOf[JList[AnyRef]]).map { a: JList[AnyRef] =>
       val word = a(0).asInstanceOf[String];

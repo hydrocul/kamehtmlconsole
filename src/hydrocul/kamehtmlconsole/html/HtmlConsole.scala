@@ -3,8 +3,9 @@ package hydrocul.kamehtmlconsole.html;
 import java.io.PrintWriter;
 import java.io.Writer;
 
-import scala.concurrent.stm.atomic;
-import scala.concurrent.stm.Ref;
+import scala.actors.Actor.actor;
+import scala.actors.Actor.loop;
+import scala.actors.Actor.react;
 
 import hydrocul.util.StringLib;
 
@@ -56,6 +57,29 @@ class HtmlConsole(console: Console, group: LineGroup){
     buf1.append(ch.asInstanceOf[Char]);
   }
 
+  private case class WriteChar(ch: Int);
+  private case class WriteChars(cbuf: Array[Char], off: Int, len: Int);
+  private case class WriteHtmlChar(ch: Int);
+  private case class WriteHtmlChars(cbuf: Array[Char], off: Int, len: Int);
+  private case class Update();
+
+  private val writerActor = actor {
+    loop {
+      react {
+        case WriteChar(ch) =>
+          write(ch);
+        case WriteChars(cbuf, off, len) =>
+          (off until off + len).foreach(ii => write(cbuf(ii)));
+        case WriteHtmlChar(ch) =>
+          writeHtml(ch);
+        case WriteHtmlChars(cbuf, off, len) =>
+          (off until off + len).foreach(ii => writeHtml(cbuf(ii)));
+        case Update() =>
+          update();
+      }
+    }
+  }
+
   // for initializing writer and htmlWriter
   private implicit def writerToPrintWriter(writer: Writer): PrintWriter =
     new PrintWriter(writer, true);
@@ -63,28 +87,32 @@ class HtmlConsole(console: Console, group: LineGroup){
   private val writer: PrintWriter = new Writer(){
 
     override def write(ch: Int): Unit =
-      synexec(console){ HtmlConsole.this.write(ch); }
+      writerActor ! WriteChar(ch);
 
     override def write(cbuf: Array[Char], off: Int, len: Int): Unit =
-      synexec(console){ (off until off + len).foreach(index => HtmlConsole.this.write(cbuf(index))); }
+      writerActor ! WriteChars(cbuf, off, len);
 
-    override def flush(): Unit = synexec(console){ HtmlConsole.this.update(); }
+    override def flush(): Unit =
+      writerActor ! Update();
 
-    override def close(): Unit = synexec(console){ HtmlConsole.this.update(); }
+    override def close(): Unit =
+      writerActor ! Update();
 
   }
 
   private val htmlWriter: PrintWriter = new Writer(){
 
     override def write(ch: Int): Unit =
-      synexec(console){ HtmlConsole.this.writeHtml(ch); }
+      writerActor ! WriteHtmlChar(ch);
 
     override def write(cbuf: Array[Char], off: Int, len: Int): Unit =
-      synexec(console){ (off until off + len).foreach(index => HtmlConsole.this.writeHtml(cbuf(index))); }
+      writerActor ! WriteHtmlChars(cbuf, off, len);
 
-    override def flush(): Unit = synexec(console){ HtmlConsole.this.update(); }
+    override def flush(): Unit =
+      writerActor ! Update();
 
-    override def close(): Unit = synexec(console){ HtmlConsole.this.update(); }
+    override def close(): Unit =
+      writerActor ! Update();
 
   }
 

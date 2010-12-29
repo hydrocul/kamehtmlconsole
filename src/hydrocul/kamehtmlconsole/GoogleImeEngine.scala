@@ -3,6 +3,7 @@ package hydrocul.kamehtmlconsole;
 import java.util.{ List => JList }
 import java.util.concurrent.Executor;
 
+import scala.actors.Actor.actor;
 import scala.collection.JavaConversions._;
 import scala.io.BufferedSource;
 import scala.io.Source;
@@ -15,14 +16,15 @@ import hydrocul.util.StringLib;
 
 class GoogleImeEngine(executor: Executor) extends ImeEngine {
 
+  import GoogleImeEngine._;
+
   def searchSuggestions(text: String, listener: ImeEngineListener){
 
     val roma = extractRoma(text);
     val hiragana = RomaKanaHenkan.roma2kana(roma);
 
-    ioexec {
-      accessGoogleAPI(hiragana);
-    } | { result: List[APIResponseItem] =>
+    actor {
+      val result: List[APIResponseItem] = accessGoogleAPI(hiragana);
       val r = result.last;
       val len = r.word.length;
       val suggestions: List[ImeEngineSuggestion] = r.kanji.map(kanji =>
@@ -31,6 +33,10 @@ class GoogleImeEngine(executor: Executor) extends ImeEngine {
     }
 
   }
+
+}
+
+private[kamehtmlconsole] object GoogleImeEngine {
 
   private[kamehtmlconsole] def extractRoma(text: String): String = {
     text match {
@@ -61,3 +67,4 @@ class GoogleImeEngine(executor: Executor) extends ImeEngine {
   private[kamehtmlconsole] case class APIResponseItem(word: String, kanji: List[String]);
 
 }
+

@@ -1,4 +1,4 @@
-package hydrocul.kamehtmlconsole.html;
+package hydrocul.kamehtmlconsole;
 
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -8,8 +8,6 @@ import scala.actors.Actor.loop;
 import scala.actors.Actor.react;
 
 import hydrocul.util.StringLib;
-
-import hydrocul.kamehtmlconsole._;
 
 class HtmlConsole(console: Console, group: LineGroup){
 

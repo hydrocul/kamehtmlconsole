@@ -1,6 +1,7 @@
 package hydrocul.kamehtmlconsole;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import scala.concurrent.stm.atomic;
 import scala.concurrent.stm.Ref;
@@ -88,37 +89,36 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
   import scala.actors.Actor.react;
   import scala.actors.Actor.self;
 
-  case class KeyEventInfo(event: KeyEvent, onComplete: Runnable, counter: Int);
-
   case class KeyEventStart(event: KeyEvent, onComplete: Runnable);
-  case class KeyEventProcessing(info: KeyEventInfo,
-    listeners: List[ConsoleListener]);
-  case class KeyEventComplete(info: KeyEventInfo);
-  case class KeyEventTimeOut(info: KeyEventInfo);
+  case class KeyEventProcessing(event: KeyEvent, onComplete: Runnable,
+    listeners: List[ConsoleListener], counter: Int);
+  case class KeyEventComplete(counter: Int);
+  case class KeyEventTimeOut(counter: Int);
 
   private val inputListenerActor = actor {
-/*
+    import hydrocul.util.ScalaUtil.block2runnable;
     var currentCounter: Int = 0;
-    var eventQueue = Vector[KeyEvent]();
-    def addEvent(event: KeyEvent, onComplete: Runnable){
-      if(eventQueue
+    var running: Boolean = false;
+    var eventQueue = Vector[(KeyEvent, Runnable)]();
+    def startNext(event: KeyEvent, onComplete: Runnable){
+      currentCounter = currentCounter + 1;
+      running = true;
+      self ! KeyEventProcessing(event, onComplete, listeners, currentCounter);
+      timer.schedule(new TimerTask(){
+        override def run(){
+          self ! KeyEventTimeOut(currentCounter);
+        }
+      }, 100); // 100ミリ秒後には次のイベントを処理できることにする
     }
     loop {
       react {
         case KeyEventStart(event, onComplete) => // handler の input から呼び出される
-          if(eventQueue.size == 0){
+          if(!running){
             // 他のイベントを処理中でない場合
-            currentCounter = currentCounter + 1;
-            self ! KeyEventProcessing(KeyEventInfo(event, onComplete, currentCounter),
-              listeners);
-            timer.schedule(new TimerTask(){
-              override def run(){
-                self ! KeyEventTimeOut(currentCounter);
-              }
-            }, 100); // 100ミリ秒後には
+            startNext(event, onComplete);
           } else {
             // まだ他のイベントを処理中の場合、キューにためる
-            eventQueue = eventQueue :+ ev;
+            eventQueue = eventQueue :+ (event, onComplete);
           }
         case KeyEventProcessing(event, onComplete, listeners, counter) =>
           // イベントを listeners に次々に渡す
@@ -126,7 +126,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
             case head :: tail =>
               actor {
                 head.input(event, {
-                  self ! KeyEventInfo(event, tail, onComplete, counter);
+                  self ! KeyEventProcessing(event, onComplete, tail, counter);
                 });
               }
             case Nil => // listeners での処理がすべて終了したとき、
@@ -137,20 +137,31 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
               }
           }
         case KeyEventComplete(counter) => // onComplete の実行が終了したとき、
-          if(counter == currentCounter && eventQueue.size > 0){
-            // まだ次のイベント処理を開始していない場合で、かつ、
-            // 次のイベントがキューに待機している場合
-            currentCounter = currentCounter + 1;
-            val next = eventQueue(0);
-            eventQueue = eventQueue.drop(1);
-            self ! KeyEventProcessing(next.event, next.onComplete,
-              listeners, currentCounter);
+          if(counter == currentCounter && running){
+            running = false;
+            if(eventQueue.size > 0){
+              // まだ次のイベント処理を開始していない場合で、かつ、
+              // 次のイベントがキューに待機している場合
+              val next: (KeyEvent, Runnable) = eventQueue(0);
+              eventQueue = eventQueue.drop(1);
+              startNext(next._1, next._2);
+            }
+          }
+        case KeyEventTimeOut(counter) =>
+          if(counter == currentCounter && running){
+            running = false;
+            if(eventQueue.size > 0){
+              // まだ次のイベント処理を開始していない場合で、かつ、
+              // 次のイベントがキューに待機している場合
+              val next: (KeyEvent, Runnable) = eventQueue(0);
+              eventQueue = eventQueue.drop(1);
+              startNext(next._1, next._2);
+            }
           }
         case e =>
           throw new Error("Unknown message: " + e.toString);
       }
     }
-*/
   }
 
   private val handler = new ConsoleListener(){
@@ -165,7 +176,7 @@ private[kamehtmlconsole] class ConsoleImpl(objectPool: ObjectPool, baseUrl: Stri
     listeners = listeners ::: ( listener :: Nil);
   }
 
-  def getHandler: ConsoleListener;
+  def getHandler: ConsoleListener = handler;
 
   def createScreen(): Screen = new ScreenImpl(this);
 

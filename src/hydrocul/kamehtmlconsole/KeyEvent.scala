@@ -73,6 +73,8 @@ object SpecialKeyEvent {
   object X extends SpecialKey;
   object Y extends SpecialKey;
   object Z extends SpecialKey;
+  object BackspaceForIME extends SpecialKey;
+
   object KeepAlive extends SpecialKey;
   object ConsoleDead extends SpecialKey;
   object Unknown extends SpecialKey;

@@ -36,7 +36,7 @@ class StdImeEngineSuggestion(val caption: String, len: Int,
       if(len==0){
         tail;
       } else {
-        sub(len - 1, SpecialKeyEvent(SpecialKeyEvent.Backspace) :: tail);
+        sub(len - 1, SpecialKeyEvent(SpecialKeyEvent.BackspaceForIME) :: tail);
       }
     }
 

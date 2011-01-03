@@ -14,12 +14,14 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
 
   private val line: LineBuffer = lineGroup.newLine();
   private val buf: Ref[String] = Ref("");
+  private val counter: Ref[Int] = Ref[Int](0);
 
   def input(event: KeyEvent, onComplete: Runnable){
     import SpecialKeyEvent._;
     event match {
       case UserTextKeyEvent(text) => inputText(event, onComplete, text);
-      case SpecialKeyEvent(Backspace, false, false, false) => inputBackspace(event, onComplete);
+      case SpecialKeyEvent(Backspace, false, false, false) => inputBackspace(
+        event, onComplete);
       case _ => inputOther(event, onComplete);
     }
   }
@@ -27,7 +29,8 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
   def setTextBuffer(text: String){
     atomic { implicit txn =>
       buf() = text;
-      searchSuggestions(text);
+      counter() = counter() + 1;
+      searchActor ! SearchStart(text, counter());
     }
   }
 
@@ -35,7 +38,8 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
     nextListener.input(event, onComplete);
     atomic { implicit txn =>
       buf() = buf() + text;
-      searchSuggestions(buf());
+      counter() = counter() + 1;
+      searchActor ! SearchStart(text, counter());
     }
   }
 
@@ -46,7 +50,8 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
       val len = b.length;
       if(len > 0){
         buf() = b.substring(0, len - 1);
-        searchSuggestions(buf());
+        counter() = counter() + 1;
+        searchActor ! SearchStart(text, counter());
       }
     }
   }
@@ -55,46 +60,67 @@ class IntelligentConsoleListener(nextListener: ConsoleListener,
     nextListener.input(event, onComplete);
     atomic { implicit txn =>
       buf() = "";
-      searchSuggestions("");
+      counter() = counter() + 1;
+      searchActor ! SearchStart(text, counter());
     }
   }
 
-  private def searchSuggestions(text: String){
+  import scala.actors.Actor.actor;
+  import scala.actors.Actor.loop;
+  import scala.actors.Actor.react;
+
+  case class SearchStart(text: String, counter: Int);
+
+  private val searchActor = actor {
+    loop {
+      react {
+        case SearchStart(text, counter) =>
+          searchSuggestions(text, counter);
+        case e =>
+          throw new Error("Unknown message: " + e.toString);
+      }
+    }
+  }
+
+  private def searchSuggestions(text: String, counter: Int){
     if(text.length==0){
-      displaySuggestions(Nil);
+      displaySuggestions(Nil, counter);
     } else {
       mainImeEngine.searchSuggestions(text, new ImeEngineListener {
         def receiveSuggestions(suggestions: List[ImeEngineSuggestion]){
           if(buf.single()==text){
-            displaySuggestions(suggestions);
+            displaySuggestions(suggestions, counter);
           }
         }
       });
     }
   }
 
-  private def displaySuggestions(suggestions: List[ImeEngineSuggestion]){
+  private def displaySuggestions(suggestions: List[ImeEngineSuggestion], counter: Int){
     atomic { implicit txn =>
-      line.clearLinkedObject();
-      val html = suggestions.map { s =>
-        val event = new ClickKeyEvent {
-          def run(){
-            pickupSuggestion(s);
+      if(counter()==counter){
+        line.clearLinkedObject();
+        val html = suggestions.map { s =>
+          val event = new ClickKeyEvent {
+            def run(){
+              pickupSuggestion(s);
+            }
           }
-        }
-        line.addLinkedObject(event);
-        val key = objectPool.getKey(event);
-        "<a href=\"#" + key + "\" class=\"ime-suggestion click-event\">" + s.caption + "</a>";
-      }.mkString;
-      line.updateHtml(html);
+          line.addLinkedObject(event);
+          val key = objectPool.getKey(event);
+          "<a href=\"#" + key + "\" class=\"ime-suggestion click-event\">" + s.caption + "</a>";
+        }.mkString;
+        line.updateHtml(html);
+      }
     }
   }
 
   private def pickupSuggestion(suggestion: ImeEngineSuggestion){
     def exec(events: List[KeyEvent]){
       events match {
-        case Nil => executor.execute { suggestion.executed(); }
-        case head :: tail => executor.execute { input(head, { exec(tail); }); }
+        case Nil => atomic { suggestion.executed(); }
+        case head :: tail => atomic { input(head, { exec(tail); }); }
+        // TODO input の同期はどうする？
       }
     }
     exec(suggestion.keyEvents);
